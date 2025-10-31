@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { saveStructure, loadStructure, clearStructure, STORAGE_KEY } from '../../utils/storage';
+import { saveStructure, loadStructure, clearStructure, STORAGE_KEY } from '../utils/storage';
 
 const defaultStructure = {
   name: 'FinWisebot-Website',
