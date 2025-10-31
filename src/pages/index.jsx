@@ -2,8 +2,12 @@ import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FeatureCard from '../components/FeatureCard';
-import StockTicker from '../components/StockTicker';
-import HeroMarketBackground from '../components/HeroMarketBackground';
+import dynamic from 'next/dynamic';
+
+// These components rely on random client-side animations/values.
+// Render them client-side only to avoid server/client hydration mismatch.
+const StockTicker = dynamic(() => import('../components/StockTicker'), { ssr: false, loading: () => <div className="h-16" /> });
+const HeroMarketBackground = dynamic(() => import('../components/HeroMarketBackground'), { ssr: false });
 
 export default function Home() {
   return (
