@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FeatureCard from '../components/FeatureCard';
 import StockTicker from '../components/StockTicker';
+import HeroMarketBackground from '../components/HeroMarketBackground';
 
 export default function Home() {
   return (
@@ -15,7 +16,8 @@ export default function Home() {
       <Navbar />
 
       <header className="bg-gradient-to-b from-[#071428] via-[#0A1931] to-[#0f2a4b] text-white min-h-screen flex flex-col justify-center items-center text-center p-6 relative overflow-hidden">
-        <div className="max-w-3xl">
+        <HeroMarketBackground />
+        <div className="max-w-3xl relative z-10">
           <h1 className="text-6xl font-heading mb-6">FinWisebot</h1>
           <p className="text-xl mb-8 opacity-90">Turn raw filings, news, and sentiment into concise, cited insights — and test your trading ideas with reliable backtests.</p>
           <div className="flex items-center justify-center gap-4">
