@@ -86,3 +86,26 @@
 }
 .animate-fade { animation: fadeIn 360ms ease-out both; }
 
+/* coming soon robot and gear animations */
+@keyframes bob {
+	0% { transform: translateY(0); }
+	50% { transform: translateY(-8px); }
+	100% { transform: translateY(0); }
+}
+.robot-bob { animation: bob 2.8s ease-in-out infinite; }
+
+@keyframes gearSpin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+.animate-gear { animation: gearSpin 4s linear infinite; }
+
+/* small wrench swing */
+@keyframes wrenchWiggle {
+	0% { transform: rotate(0deg); }
+	50% { transform: rotate(12deg); }
+	100% { transform: rotate(0deg); }
+}
+.wrench { animation: wrenchWiggle 1.6s ease-in-out infinite; transform-origin: center; }
+
+

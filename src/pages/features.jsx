@@ -37,7 +37,7 @@ export default function Features() {
   }, []);
 
   return (
-    <div>
+    <div className="bg-slate-900 text-white min-h-screen">
       <Navbar />
 
       <header className="px-6 py-12 bg-gradient-to-r from-slate-900 to-slate-800 text-white">
@@ -78,14 +78,14 @@ export default function Features() {
       </header>
 
       <main className="max-w-6xl mx-auto p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-        <FeatureCard icon="📈" title="Real-Time Insights" description="Summaries from filings, news, and social sentiment." accent="from-emerald-300 to-green-400" />
-        <FeatureCard icon="💹" title="Signal Engine" description="Actionable trading ideas using ensemble models." accent="from-yellow-300 to-amber-400" />
-        <FeatureCard icon="📊" title="Backtesting" description="Validate strategies against historical data with event-level accuracy." accent="from-cyan-300 to-blue-400" />
-        <FeatureCard icon="🧾" title="Cited Research" description="Every claim linked to primary sources and filings." accent="from-pink-300 to-purple-400" />
-        <FeatureCard icon="🔁" title="Workflow Automation" description="Schedule backtests and alerts with priority queues." accent="from-indigo-300 to-violet-400" />
-        <FeatureCard icon="🔒" title="Privacy-first" description="Keep your strategies private; export reproducible results." accent="from-gray-300 to-slate-400" />
-        <FeatureCard icon="⚡" title="Low-latency" description="Optimized paths for fast signal delivery." accent="from-red-300 to-rose-400" />
-        <FeatureCard icon="🤝" title="Integrations" description="Connect to brokers, data feeds, and notebooks." accent="from-emerald-200 to-teal-400" />
+        <FeatureCard slug="real-time-insights" dark icon="📈" title="Real-Time Insights" description="Summaries from filings, news, and social sentiment." accent="from-emerald-300 to-green-400" />
+        <FeatureCard slug="signal-engine" dark icon="💹" title="Signal Engine" description="Actionable trading ideas using ensemble models." accent="from-yellow-300 to-amber-400" />
+        <FeatureCard slug="backtesting" dark icon="📊" title="Backtesting" description="Validate strategies against historical data with event-level accuracy." accent="from-cyan-300 to-blue-400" />
+        <FeatureCard slug="cited-research" dark icon="🧾" title="Cited Research" description="Every claim linked to primary sources and filings." accent="from-pink-300 to-purple-400" />
+        <FeatureCard slug="workflow-automation" dark icon="🔁" title="Workflow Automation" description="Schedule backtests and alerts with priority queues." accent="from-indigo-300 to-violet-400" />
+        <FeatureCard slug="privacy-first" dark icon="🔒" title="Privacy-first" description="Keep your strategies private; export reproducible results." accent="from-gray-300 to-slate-400" />
+        <FeatureCard slug="low-latency" dark icon="⚡" title="Low-latency" description="Optimized paths for fast signal delivery." accent="from-red-300 to-rose-400" />
+        <FeatureCard slug="integrations" dark icon="🤝" title="Integrations" description="Connect to brokers, data feeds, and notebooks." accent="from-emerald-200 to-teal-400" />
       </main>
 
       <Footer />
