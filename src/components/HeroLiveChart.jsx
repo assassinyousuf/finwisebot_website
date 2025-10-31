@@ -42,7 +42,7 @@ export default function HeroLiveChart({ height = 220 }) {
   const up = latest >= prev;
 
   return (
-    <div className="absolute inset-0 pointer-events-none -z-20 flex items-center justify-center">
+    <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center">
       <div className="w-full max-w-6xl px-6" style={{ height }}>
         <svg ref={svgRef} viewBox={`0 0 ${w} ${height}`} preserveAspectRatio="none" className="w-full h-full opacity-60 blur-[0.6px]">
           <defs>

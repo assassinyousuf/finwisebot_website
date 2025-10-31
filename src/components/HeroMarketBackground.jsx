@@ -28,7 +28,7 @@ export default function HeroMarketBackground({ count = 6 }) {
   }, [count]);
 
   return (
-    <div className="absolute inset-0 pointer-events-none -z-10">
+  <div className="absolute inset-0 pointer-events-none z-0">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-transparent" />
       <div className="relative w-full h-full overflow-hidden">
         {svgs.map((s, idx) => {

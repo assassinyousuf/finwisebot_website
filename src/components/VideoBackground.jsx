@@ -118,6 +118,6 @@ export default function VideoBackground() {
   }, []);
 
   return (
-    <div ref={mountRef} className="absolute inset-0 -z-30 pointer-events-none" />
+    <div ref={mountRef} className="absolute inset-0 z-0 pointer-events-none" />
   );
 }
