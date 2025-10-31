@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import ChatBubble from '../../components/ChatBubble';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import ChatBubble from '../components/ChatBubble';
 
 export default function Demo() {
   const [messages, setMessages] = useState([]);

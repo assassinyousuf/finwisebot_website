@@ -1,6 +1,6 @@
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import FeatureCard from '../../components/FeatureCard';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import FeatureCard from '../components/FeatureCard';
 
 export default function Features() {
   return (

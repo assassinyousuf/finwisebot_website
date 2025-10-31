@@ -1,7 +1,7 @@
 import Head from 'next/head';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import FeatureCard from '../../components/FeatureCard';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import FeatureCard from '../components/FeatureCard';
 
 export default function Home() {
   return (

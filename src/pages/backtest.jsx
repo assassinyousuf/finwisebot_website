@@ -1,6 +1,6 @@
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import BacktestChart from '../../components/BacktestChart';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import BacktestChart from '../components/BacktestChart';
 
 export default function Backtest() {
   return (
