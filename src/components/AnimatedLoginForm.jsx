@@ -62,7 +62,7 @@ export default function AnimatedLoginForm() {
           </button>
 
           <div className="text-sm text-white/70 mt-2">
-            Don’t have an account? <Link href="/signup"><a className="text-accent underline">Sign up</a></Link>
+            Don’t have an account? <Link href="/signup" className="text-accent underline">Sign up</Link>
           </div>
 
           {message && <div className="mt-3 text-sm text-white/80">{message}</div>}
