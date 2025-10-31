@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatBubble from '../components/ChatBubble';
 import DemoVisualizer from '../components/DemoVisualizer';
+import DemoBackground from '../components/DemoBackground';
 
 export default function Demo() {
   const [messages, setMessages] = useState([]);
@@ -35,7 +36,8 @@ export default function Demo() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen relative overflow-hidden">
+      <DemoBackground />
       <Navbar />
       <main className="flex-1 p-6 max-w-6xl mx-auto flex gap-6">
         <section className="flex-1 flex flex-col bg-white/5 rounded-xl p-4 shadow-lg">

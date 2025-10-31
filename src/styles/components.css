@@ -61,3 +61,21 @@
 .float-up:nth-child(2) { animation-delay: 240ms }
 .float-up:nth-child(3) { animation-delay: 360ms }
 
+/* demo background wave animations */
+.wave-wrapper { position: relative; width: 200%; left: -50%; height: 100%; overflow: hidden; }
+.wave { position: absolute; left: 0; top: 0; width: 200%; height: 100%; transform: translate3d(0,0,0); will-change: transform; animation: moveWave 10s linear infinite; }
+.wave-slow { animation-duration: 18s; opacity: 0.9 }
+
+@keyframes moveWave {
+	0% { transform: translateX(0); }
+	100% { transform: translateX(-25%); }
+}
+
+/* very slow blob float for the big gradient */
+@keyframes blobSlow {
+	0% { transform: translateY(0) scale(1); }
+	50% { transform: translateY(-16px) scale(1.02); }
+	100% { transform: translateY(0) scale(1); }
+}
+.animate-blob-slow { animation: blobSlow 12s ease-in-out infinite; }
+
