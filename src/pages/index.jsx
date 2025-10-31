@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 // Render them client-side only to avoid server/client hydration mismatch.
 const StockTicker = dynamic(() => import('../components/StockTicker'), { ssr: false, loading: () => <div className="h-16" /> });
 const HeroMarketBackground = dynamic(() => import('../components/HeroMarketBackground'), { ssr: false });
+const HeroLiveChart = dynamic(() => import('../components/HeroLiveChart'), { ssr: false });
 
 export default function Home() {
   return (
@@ -20,8 +21,9 @@ export default function Home() {
       <Navbar />
 
       <header className="bg-gradient-to-b from-[#071428] via-[#0A1931] to-[#0f2a4b] text-white min-h-screen flex flex-col justify-center items-center text-center p-6 relative overflow-hidden">
-        <HeroMarketBackground />
-        <div className="max-w-3xl relative z-10">
+  <HeroMarketBackground />
+  <HeroLiveChart height={260} />
+  <div className="max-w-3xl relative z-20">
           <h1 className="text-6xl font-heading mb-6">FinWisebot</h1>
           <p className="text-xl mb-8 opacity-90">Turn raw filings, news, and sentiment into concise, cited insights — and test your trading ideas with reliable backtests.</p>
           <div className="flex items-center justify-center gap-4">
