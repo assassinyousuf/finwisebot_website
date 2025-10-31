@@ -18,3 +18,33 @@
 /* small utility to provide stronger backdrop blur where supported */
 .backdrop-strong { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);} 
 
+/* Floating/entrance animation for elements */
+.float-up { animation: floatUp 900ms ease-out both; }
+@keyframes floatUp {
+	from { transform: translateY(8px); opacity: 0; }
+	to { transform: translateY(0); opacity: 1; }
+}
+
+/* sparkline draw animation */
+@keyframes drawLine {
+	to { stroke-dashoffset: 0; }
+}
+
+.sparkline path {
+	stroke: rgba(255,255,255,0.95);
+	stroke-width: 2;
+	fill: none;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-dasharray: 200;
+	stroke-dashoffset: 200;
+	animation: drawLine 2.2s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+/* subtle pulse for stat numbers */
+.pulse-soft { animation: pulseSoft 2.4s infinite ease-in-out; }
+@keyframes pulseSoft {
+	0%,100% { transform: scale(1); }
+	50% { transform: scale(1.02); }
+}
+
