@@ -1,10 +1,19 @@
 import { useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatBubble from '../components/ChatBubble';
-import DemoVisualizer from '../components/DemoVisualizer';
 import ExportButton from '../components/ExportButton';
-import DemoBackground from '../components/DemoBackground';
+
+// Dynamically load heavy visual components client-side to reduce initial bundle size
+const DemoVisualizer = dynamic(() => import('../components/DemoVisualizer'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-24 w-full flex items-center justify-center text-sm text-gray-400">Loading visualizer...</div>
+  ),
+});
+
+const DemoBackground = dynamic(() => import('../components/DemoBackground'), { ssr: false });
 
 export default function Demo() {
   const [messages, setMessages] = useState([]);
