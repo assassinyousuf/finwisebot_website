@@ -13,6 +13,20 @@ Notes:
 - Pages are under `src/pages` (Next.js supported). API placeholders live in `src/pages/api`.
 - Replace the placeholder API handlers with your LangChain/RAG/LoRA backend when ready.
 - Replace the placeholder API handlers with your LangChain/RAG/LoRA backend when ready.
+- Replace the placeholder API handlers with your LangChain/RAG/LoRA backend when ready.
+
+Deploying on Netlify (Next.js)
+
+This repository is configured to deploy on Netlify using the official Next.js plugin. The repository includes `netlify.toml` and Netlify will use the plugin to build pages and serverless functions for API routes.
+
+Quick steps to deploy:
+1. Push this repo to GitHub (already done).
+2. Sign in to Netlify and click "New site from Git" → choose GitHub and select this repo.
+3. In Netlify's build settings, use the defaults (the plugin will run). Build command: `npm run build`. Publish directory: `.next`.
+4. Ensure the plugin `@netlify/plugin-nextjs` is installed automatically by Netlify (it reads `netlify.toml` and installs it during build). You don't need to add it locally unless you want to test.
+5. Add any environment variables in Netlify's dashboard under Site settings → Build & deploy → Environment.
+
+If you prefer a static export (no serverless APIs), you can use `next export` and set the publish directory to `out` instead. Note: `next export` requires all pages to be static and does not support Next API routes.
 
 Develop without installing Node (VS Code Dev Container)
 
