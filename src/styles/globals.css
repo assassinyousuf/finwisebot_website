@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f9fafb;
+  color: #0A1931;
+}
+a { text-decoration: none; }
+button { cursor: pointer; }
+
+.font-heading { font-family: 'Poppins', sans-serif; }

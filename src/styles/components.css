@@ -1,0 +1,2 @@
+/* Component specific styles (optional) */
+.card { @apply bg-white p-4 rounded shadow; }
