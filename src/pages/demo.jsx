@@ -62,18 +62,18 @@ export default function Demo() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden">
+  <div className="flex flex-col min-h-screen relative overflow-hidden bg-slate-900 text-white">
       <DemoBackground />
       <Navbar />
       <main className="flex-1 p-6 max-w-6xl mx-auto flex gap-6">
-        <section className="flex-1 flex flex-col bg-white/5 rounded-xl p-4 shadow-lg">
+        <section className="flex-1 flex flex-col bg-slate-800/40 rounded-xl p-4 shadow-lg">
           <div className="mb-2 flex gap-2">
             {quickActions.map((q, i) => (
-              <button key={i} onClick={() => handleQuick(q.prompt)} className="bg-white/5 text-white px-3 py-1 rounded text-sm">{q.label}</button>
+              <button key={i} onClick={() => handleQuick(q.prompt)} className="bg-slate-700/40 text-white px-3 py-1 rounded text-sm">{q.label}</button>
             ))}
             <label className="ml-auto flex items-center gap-2 text-sm">
               <input type="file" accept=".pdf,.csv" onChange={handleFileUpload} className="hidden" />
-              <span className="bg-white/5 px-3 py-1 rounded">Upload PDF/CSV</span>
+              <span className="bg-slate-700/40 px-3 py-1 rounded">Upload PDF/CSV</span>
             </label>
           </div>
 
@@ -89,7 +89,7 @@ export default function Demo() {
 
           <div className="flex gap-3 items-center">
             <input 
-              className="flex-1 p-3 rounded-md bg-white/6 border border-white/10 text-white placeholder-white/50 focus:outline-none"
+              className="flex-1 p-3 rounded-md bg-slate-700/20 border border-white/10 text-white placeholder-white/50 focus:outline-none"
               value={input} 
               onChange={(e) => setInput(e.target.value)} 
               placeholder="Ask about a stock or financial report..." 

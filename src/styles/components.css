@@ -79,3 +79,10 @@
 }
 .animate-blob-slow { animation: blobSlow 12s ease-in-out infinite; }
 
+/* fade animation used by messages */
+@keyframes fadeIn {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade { animation: fadeIn 360ms ease-out both; }
+

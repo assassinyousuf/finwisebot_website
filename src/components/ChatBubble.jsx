@@ -14,7 +14,7 @@ export default function ChatBubble({ message, onReact }) {
   return (
     <div className={`mb-3 flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade`}> 
       <div className={`max-w-xl ${isUser ? 'text-right' : 'text-left'}`}>
-        <div className={`inline-block p-3 rounded-lg ${isUser ? 'bg-green-100 text-black' : 'bg-slate-700 text-white'} shadow-md`}> 
+        <div className={`inline-block p-3 rounded-lg ${isUser ? 'bg-emerald-700 text-white' : 'bg-slate-700 text-white'} shadow-md`}> 
           <div className="whitespace-pre-wrap">{message.text}</div>
           {message.citations && message.citations.length > 0 && (
             <div className="mt-2 text-xs text-blue-200">
