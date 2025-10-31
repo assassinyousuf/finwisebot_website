@@ -1,2 +1,20 @@
 /* Component specific styles (optional) */
 .card { @apply bg-white p-4 rounded shadow; }
+
+/* Animated blobs and minor helpers for the animated login form */
+@keyframes blob {
+	0% { transform: translateY(0) scale(1); }
+	33% { transform: translateY(-12px) scale(1.05); }
+	66% { transform: translateY(6px) scale(0.98); }
+	100% { transform: translateY(0) scale(1); }
+}
+
+.animate-blob {
+	animation: blob 8s infinite ease-in-out;
+}
+
+.animation-delay-2000 { animation-delay: 2s; }
+
+/* small utility to provide stronger backdrop blur where supported */
+.backdrop-strong { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);} 
+
