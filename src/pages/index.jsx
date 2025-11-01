@@ -26,12 +26,14 @@ export default function Home() {
   <VideoBackground />
   <HeroMarketBackground />
   <HeroLiveChart height={260} />
-  <div className="max-w-3xl relative z-30">
-          <h1 className="text-6xl font-heading mb-6">FinWisebot</h1>
-          <p className="text-xl mb-8 opacity-90">Turn raw filings, news, and sentiment into concise, cited insights — and test your trading ideas with reliable backtests.</p>
-          <div className="flex items-center justify-center gap-4">
-            <a href="/demo" className="bg-accent text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90">Try Demo</a>
-            <a href="/features" className="border border-white/20 text-white px-5 py-3 rounded-lg">Explore Features</a>
+  <div className="max-w-3xl relative z-40">
+          <div className="bg-white/5 backdrop-blur-md border border-white/6 rounded-2xl px-10 py-8 shadow-xl max-w-3xl mx-auto">
+            <h1 className="text-5xl md:text-6xl font-heading mb-4">FinWisebot</h1>
+            <p className="text-lg md:text-xl mb-6 text-white/90">Turn raw filings, news, and sentiment into concise, cited insights — and test your trading ideas with reliable backtests.</p>
+            <div className="flex items-center justify-center gap-4">
+              <a href="/demo" className="bg-accent text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90">Try Demo</a>
+              <a href="/features" className="border border-white/20 text-white px-5 py-3 rounded-lg">Explore Features</a>
+            </div>
           </div>
         </div>
         

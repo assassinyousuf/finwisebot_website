@@ -51,7 +51,7 @@ export default function HeroMarketBackground({ count = 6 }) {
                 </linearGradient>
               </defs>
               <path d={s.path} fill={`url(#hg-${idx})`} stroke="none" />
-              <path d={s.path} fill="none" stroke={s.up ? '#34d399' : '#f87171'} strokeWidth="1.8" strokeOpacity="0.85" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={s.path} fill="none" stroke={s.up ? '#34d399' : '#f87171'} strokeWidth="1.2" strokeOpacity="0.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           );
         })}

@@ -19,12 +19,13 @@ export default function HeroLiveChart({ height = 220 }) {
     const stepTick = () => {
       setPoints(prev => {
         const last = prev[prev.length - 1] ?? 100;
-        const noise = (Math.random() - 0.48) * (1.8 + Math.random() * 2.2);
+        // much smaller, smoother noise for elegant motion
+        const noise = (Math.random() - 0.5) * (0.5 + Math.random() * 0.6);
         const next = Math.max(5, last + noise);
         const nextArr = prev.slice(1).concat(next);
         return nextArr;
       });
-      if (running) raf.current = requestAnimationFrame(() => setTimeout(stepTick, 120 + Math.random() * 160));
+      if (running) raf.current = requestAnimationFrame(() => setTimeout(stepTick, 220 + Math.random() * 260));
     };
     raf.current = requestAnimationFrame(stepTick);
     return () => { running = false; cancelAnimationFrame(raf.current); };
