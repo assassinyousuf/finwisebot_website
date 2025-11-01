@@ -1,7 +1,7 @@
 // Verbose MongoDB connection tester using Mongoose
 // Usage: node scripts/test-mongo-conn-verbose.js
 
-require('dotenv').config()
+require('dotenv').config({ path: '.env.local' })
 const mongoose = require('mongoose')
 const dns = require('dns')
 const util = require('util')

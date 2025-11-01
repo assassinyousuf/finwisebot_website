@@ -1,7 +1,7 @@
 // scripts/seed-admin.js
 // Creates an admin user in MongoDB using MONGODB_URI from .env.local
 
-require('dotenv').config()
+require('dotenv').config({ path: '.env.local' })
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const readline = require('readline')
