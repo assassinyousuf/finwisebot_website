@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router'
 import Link from 'next/link';
 
 export default function AnimatedSignupForm() {
@@ -40,6 +41,8 @@ export default function AnimatedSignupForm() {
         setEmail('')
         setPassword('')
         setConfirm('')
+        // redirect to homepage after a short pause so user sees confirmation
+        setTimeout(() => router.push('/'), 900)
       }
     } catch (err) {
       console.error(err)
