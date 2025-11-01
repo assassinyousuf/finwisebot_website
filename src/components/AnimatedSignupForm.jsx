@@ -8,6 +8,7 @@ export default function AnimatedSignupForm() {
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
   const submit = async (e) => {
     e.preventDefault();
