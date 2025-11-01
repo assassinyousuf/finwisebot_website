@@ -85,8 +85,25 @@ export default async function handler(req, res) {
 
       if (!user.verified) return res.status(403).json({ ok: false, error: 'Email not verified' })
 
-      // TODO: Issue httpOnly cookie / JWT here in production
-      return res.status(200).json({ ok: true, message: 'Logged in (demo)' })
+      // Issue httpOnly JWT cookie on login
+      try {
+        const { signToken } = await import('../../lib/jwt')
+        const token = signToken({ sub: user._id.toString(), email: user.email })
+        // set cookie
+        const cookie = await import('cookie')
+        const serialized = cookie.serialize('finwise_token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+        })
+        res.setHeader('Set-Cookie', serialized)
+        return res.status(200).json({ ok: true, message: 'Logged in' })
+      } catch (err) {
+        console.error('cookie/jwt error', err)
+        return res.status(200).json({ ok: true, message: 'Logged in (no cookie set)' })
+      }
     } catch (err) {
       console.error('login error', err)
       return res.status(500).json({ ok: false, error: 'Internal server error' })
