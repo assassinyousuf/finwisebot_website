@@ -5,12 +5,8 @@ import FeatureCard from '../components/FeatureCard';
 import dynamic from 'next/dynamic';
 import HeroShowcase from '../components/HeroShowcase';
 
-// These components rely on random client-side animations/values.
-// Render them client-side only to avoid server/client hydration mismatch.
-const StockTicker = dynamic(() => import('../components/StockTicker'), { ssr: false, loading: () => <div className="h-16" /> });
-const HeroMarketBackground = dynamic(() => import('../components/HeroMarketBackground'), { ssr: false });
-const HeroLiveChart = dynamic(() => import('../components/HeroLiveChart'), { ssr: false });
-const VideoBackground = dynamic(() => import('../components/VideoBackground'), { ssr: false });
+// Ambient orbs are client-only to avoid SSR/hydration issues
+const AmbientOrbs = dynamic(() => import('../components/AmbientOrbs'), { ssr: false });
 
 export default function Home() {
   return (
@@ -23,10 +19,8 @@ export default function Home() {
       <Navbar />
 
   <header className="hero-bg text-white min-h-screen flex flex-col justify-center items-center text-center p-6 relative overflow-hidden">
-  {/* optional video watermark (place /background.mp4 in public/) */}
-  <VideoBackground />
-  <HeroMarketBackground />
-  <HeroLiveChart height={260} />
+  {/* ambient decorative background (orbs); no floating graphs */}
+  <AmbientOrbs />
   <div className="max-w-6xl w-full relative z-40">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
       <div className="px-4">
