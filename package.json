@@ -5,15 +5,18 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test-mongo": "node scripts/test-mongo-conn-verbose.js"
   },
   "dependencies": {
     "autoprefixer": "^10.4.13",
     "bcryptjs": "^2.4.3",
+    "cookie": "^1.0.2",
+    "jsonwebtoken": "^9.0.0",
+    "mongodb": "^6.20.0",
     "mongoose": "^8.19.2",
-  "jsonwebtoken": "^9.0.0",
-  "cookie": "^0.5.0",
     "next": "^14.0.0",
+    "next-auth": "^4.24.13",
     "postcss": "^8.4.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
