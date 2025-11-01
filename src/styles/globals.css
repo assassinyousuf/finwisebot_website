@@ -41,3 +41,39 @@ button { cursor: pointer; }
 /* Glass panel utility */
 .glass { background: var(--panel); backdrop-filter: blur(6px); }
 
+/* Hero background: layered radial highlights + subtle animated shift + noise overlay */
+.hero-bg {
+  background-color: var(--bg-900);
+  background-image:
+    radial-gradient(600px 400px at 10% 20%, rgba(48,78,143,0.35), transparent 30%),
+    radial-gradient(500px 360px at 90% 80%, rgba(6,214,160,0.08), transparent 25%),
+    linear-gradient(180deg, var(--bg-900) 0%, var(--bg-800) 60%, #071428 100%);
+  background-blend-mode: screen, overlay, normal;
+  background-size: 140% 140%, 120% 120%, cover;
+  animation: hero-bg-shift 14s linear infinite;
+  position: relative;
+}
+
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* subtle dot/noise texture */
+  background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0.55;
+  mix-blend-mode: overlay;
+}
+
+@keyframes hero-bg-shift {
+  0% { background-position: 0% 0%, 100% 100%, 50% 0%; }
+  50% { background-position: 50% 50%, 50% 50%, 50% 100%; }
+  100% { background-position: 0% 100%, 0% 0%, 50% 0%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg { animation: none !important; }
+  .hero-bg::after { opacity: 0.3; }
+}
+
