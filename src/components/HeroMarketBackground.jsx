@@ -32,15 +32,16 @@ export default function HeroMarketBackground({ count = 6 }) {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-transparent" />
       <div className="relative w-full h-full overflow-hidden">
         {svgs.map((s, idx) => {
-          const left = Math.round((idx / svgs.length) * 100 + Math.random() * 6 - 3);
-          const top = Math.round(12 + (idx % 3) * 12 + Math.random() * 8 - 4);
-          const dur = 28 + Math.round(Math.random() * 36);
-          const bob = 6 + Math.round(Math.random() * 10);
+          const left = Math.round((idx / svgs.length) * 100 + Math.random() * 4 - 2);
+          const top = Math.round(12 + (idx % 3) * 10 + Math.random() * 6 - 3);
+          const dur = 40 + Math.round(Math.random() * 40);
+          // reduced bob amplitude and opacity for a subtler background
+          const bob = 2 + Math.round(Math.random() * 3);
           return (
             <svg
               key={idx}
-              className={`hero-spark absolute opacity-20 blur-sm`} 
-              style={{ left: `${left}%`, top: `${top}%`, width: `${s.width}px`, height: `${s.height}px`, transformOrigin: 'center', animation: `drift ${dur}s linear infinite, bob ${dur/6}s ease-in-out ${idx * 0.4}s infinite` }}
+              className={`hero-spark absolute opacity-12`} 
+              style={{ left: `${left}%`, top: `${top}%`, width: `${s.width}px`, height: `${s.height}px`, transformOrigin: 'center', animation: `drift ${dur}s linear infinite, bob ${dur/8}s ease-in-out ${idx * 0.4}s infinite` }}
               viewBox={`0 0 ${s.width} ${s.height}`}
             >
               <defs>
@@ -57,9 +58,9 @@ export default function HeroMarketBackground({ count = 6 }) {
       </div>
 
       <style jsx global>{`
-        @keyframes drift { from { transform: translateX(0px); } to { transform: translateX(-18%); } }
-        @keyframes bob { 0% { transform: translateY(0px); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0px); } }
-        .hero-spark { mix-blend-mode: screen; }
+        @keyframes drift { from { transform: translateX(0px); } to { transform: translateX(-6%); } }
+        @keyframes bob { 0% { transform: translateY(0px); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0px); } }
+        .hero-spark { mix-blend-mode: screen; filter: blur(.2px); }
       `}</style>
     </div>
   );

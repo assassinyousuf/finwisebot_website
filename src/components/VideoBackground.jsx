@@ -34,7 +34,7 @@ export default function VideoBackground() {
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     }
 
-    // Create multiple moving sparklines
+    // Create multiple moving sparklines with smoothing state
     const lanes = [];
     const laneCount = 5;
     const baseLen = 160;
@@ -45,7 +45,7 @@ export default function VideoBackground() {
         v += (Math.random() - 0.48) * (0.6 + i * 0.18);
         arr.push(v);
       }
-      lanes.push({ points: arr, speed: 0.12 + Math.random() * 0.22, hue: 180 + i * 18, offset: i * 0.02 });
+      lanes.push({ points: arr, targetOffset: i * 0.02, offset: i * 0.02, speed: 0.06 + Math.random() * 0.12, hue: 180 + i * 18 });
     }
 
     let last = performance.now();
@@ -72,31 +72,36 @@ export default function VideoBackground() {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); ctx.closePath();
       }
 
-      // draw lanes
+      // draw lanes with smooth offset interpolation for calmer motion
       lanes.forEach((lane, idx) => {
-        // shift the data by speed
-        lane.offset += lane.speed * (dt / 16);
+        // ease current offset toward targetOffset to smooth movement
+        lane.targetOffset += lane.speed * (dt / 160) * 0.5; // advance target slowly
+        lane.offset += (lane.targetOffset - lane.offset) * 0.08; // lerp
         const pts = lane.points;
         const len = pts.length;
-        // compute path scaled to width/height
+        // compute path scaled to width/height with slight smoothing in y
         ctx.beginPath();
+        let prevY = null;
         for (let i = 0; i < len; i++) {
           const t = (i / (len - 1));
           const x = t * W;
-          const norm = (pts[(i + Math.floor(lane.offset)) % len] - 10) / 120; // normalize
-          const y = H * (0.5 - (norm - idx * 0.02) * 0.7);
+          const idxPt = (i + Math.floor(lane.offset)) % len;
+          const raw = pts[idxPt];
+          const norm = (raw - 10) / 120;
+          const yRaw = H * (0.5 - (norm - idx * 0.02) * 0.7);
+          const y = prevY === null ? yRaw : prevY + (yRaw - prevY) * 0.12; // smooth step
+          prevY = y;
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
-        // glow fill
-        const col = `hsl(${lane.hue} 70% ${idx % 2 ? '55%' : '48%'})`;
-        ctx.strokeStyle = `rgba(100,200,210,${0.18 - idx * 0.02})`;
-        ctx.lineWidth = 1.8 - idx * 0.22;
+        // glow stroke
+        ctx.strokeStyle = `rgba(100,200,210,${0.12 - idx * 0.015})`;
+        ctx.lineWidth = 1.2 - idx * 0.12;
         ctx.stroke();
 
-        // subtle filled under the curve
+        // subtle filled under the curve (very light)
         ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
         const g = ctx.createLinearGradient(0, H * 0.1, 0, H);
-        const alpha = 0.06 - idx * 0.008;
+        const alpha = 0.04 - idx * 0.006;
         g.addColorStop(0, `rgba(6,182,212,${alpha})`);
         g.addColorStop(1, 'rgba(7,20,40,0)');
         ctx.fillStyle = g;

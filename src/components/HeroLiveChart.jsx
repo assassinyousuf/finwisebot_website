@@ -44,14 +44,14 @@ export default function HeroLiveChart({ height = 220 }) {
   return (
     <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center">
       <div className="w-full max-w-6xl px-6" style={{ height }}>
-        <svg ref={svgRef} viewBox={`0 0 ${w} ${height}`} preserveAspectRatio="none" className="w-full h-full opacity-60 blur-[0.6px]">
+        <svg ref={svgRef} viewBox={`0 0 ${w} ${height}`} preserveAspectRatio="none" className="w-full h-full opacity-48 blur-[0.3px]">
           <defs>
             <linearGradient id="heroGradient" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor={up ? '#0ea5a9' : '#fb7185'} stopOpacity="0.18" />
+              <stop offset="0%" stopColor={up ? '#0ea5a9' : '#fb7185'} stopOpacity="0.14" />
               <stop offset="100%" stopColor="#071428" stopOpacity="0" />
             </linearGradient>
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="6" result="coloredBlur" />
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
               <feMerge>
                 <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
@@ -59,9 +59,9 @@ export default function HeroLiveChart({ height = 220 }) {
             </filter>
           </defs>
           <path d={path} fill={`url(#heroGradient)`} stroke="none" />
-          <path d={path} fill="none" stroke={up ? '#06b6d4' : '#fb7185'} strokeWidth="2.2" strokeLinecap="round" filter="url(#glow)" />
-          {/* moving marker */}
-          <circle cx={(points.length - 1) * stepX} cy={mapY(latest)} r="6" fill={up ? '#34d399' : '#f87171'} opacity="0.95" />
+          <path d={path} fill="none" stroke={up ? '#06b6d4' : '#fb7185'} strokeWidth="1.6" strokeLinecap="round" filter="url(#glow)" strokeOpacity="0.95" />
+          {/* subtle marker */}
+          <circle cx={(points.length - 1) * stepX} cy={mapY(latest)} r="4" fill={up ? '#34d399' : '#f87171'} opacity="0.9" />
         </svg>
       </div>
     </div>

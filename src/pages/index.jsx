@@ -35,14 +35,7 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Live tickers row */}
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StockTicker symbol="AAPL" />
-            <StockTicker symbol="NVDA" />
-            <StockTicker symbol="TSLA" />
-          </div>
-        </div>
+        {/* live tickers removed for a cleaner hero (per request) */}
       </header>
       <section className="py-20 px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-slate-900">
         <FeatureCard 
