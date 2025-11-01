@@ -15,17 +15,46 @@ export default function AnimatedSignupForm() {
       setMessage('Passwords do not match');
       return;
     }
+
+    // basic client-side strength check
+    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      setMessage('Password must be at least 8 characters and include letters and numbers');
+      return;
+    }
+
     setLoading(true);
     try {
-      // placeholder: mimic API call
-      await new Promise((r) => setTimeout(r, 900));
-      setMessage('Account created (demo) — you can now log in');
+      const resp = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'signup', email, password }),
+      })
+      const data = await resp.json()
+      if (!resp.ok) {
+        setMessage(data.error || 'Signup failed')
+      } else {
+        // For demo we may receive a verifyToken in dev
+        let note = data.message || 'Account created — check your email to verify.'
+        if (data.verifyToken) note += `\n(DEV token: ${data.verifyToken})`
+        setMessage(note)
+        setEmail('')
+        setPassword('')
+        setConfirm('')
+      }
     } catch (err) {
-      setMessage('Signup failed');
+      console.error(err)
+      setMessage('Signup failed — please try again later')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   };
+
+  const passwordStrength = () => {
+    if (password.length >= 12 && /[A-Z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password)) return 'Strong'
+    if (password.length >= 8) return 'Good'
+    if (password.length > 0) return 'Weak'
+    return ''
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center relative bg-gradient-to-br from-[#021025] to-[#071024] overflow-hidden">
@@ -74,6 +103,8 @@ export default function AnimatedSignupForm() {
           >
             {loading ? 'Creating…' : 'Create account'}
           </button>
+
+          <div className="text-xs text-white/60 mt-1">Password strength: <span className="font-medium">{passwordStrength()}</span></div>
 
           <div className="text-sm text-white/70 mt-2">
             Already have an account? <Link href="/login" className="text-accent underline">Sign in</Link>
