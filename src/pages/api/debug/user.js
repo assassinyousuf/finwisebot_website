@@ -1,5 +1,5 @@
-import dbConnect from '../../../../lib/mongoose'
-import User from '../../../../models/User'
+import dbConnect from '../../../lib/mongoose'
+import User from '../../../models/User'
 
 export default async function handler(req, res) {
   if (process.env.NODE_ENV === 'production') return res.status(403).json({ ok: false, error: 'Forbidden' })

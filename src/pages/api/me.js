@@ -1,4 +1,3 @@
-import cookie from 'cookie'
 import { verifyToken } from '../../lib/jwt'
 import dbConnect from '../../lib/mongoose'
 import User from '../../models/User'
@@ -7,7 +6,9 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' })
   await dbConnect()
 
-  const cookies = req.headers.cookie ? cookie.parse(req.headers.cookie) : {}
+  // use dynamic import for cookie to avoid any static resolution issues in dev
+  const cookieLib = await import('cookie')
+  const cookies = req.headers.cookie ? cookieLib.parse(req.headers.cookie) : {}
   const token = cookies.finwise_token
   if (!token) return res.status(401).json({ ok: false, error: 'Not authenticated' })
 
