@@ -6,10 +6,10 @@ import dynamic from 'next/dynamic';
 import HeroShowcase from '../components/HeroShowcase';
 import ChatWidget from '../components/ChatWidget';
 import Hero from '../components/Hero';
+import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 
 const Testimonials = dynamic(() => import('../components/Testimonials'), { ssr: false })
-import { useEffect, useState } from 'react'
 
 // Ambient orbs are client-only to avoid SSR/hydration issues
 const AmbientOrbs = dynamic(() => import('../components/AmbientOrbs'), { ssr: false });
