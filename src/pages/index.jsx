@@ -6,6 +6,9 @@ import dynamic from 'next/dynamic';
 import HeroShowcase from '../components/HeroShowcase';
 import ChatWidget from '../components/ChatWidget';
 import Hero from '../components/Hero';
+import dynamic from 'next/dynamic'
+
+const Testimonials = dynamic(() => import('../components/Testimonials'), { ssr: false })
 import { useEffect, useState } from 'react'
 
 // Ambient orbs are client-only to avoid SSR/hydration issues
@@ -59,7 +62,7 @@ export default function Home() {
         </div>
       </div>
 
-      <section className="py-20 px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-slate-900">
+  <section className="py-20 px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-slate-900">
         <FeatureCard 
           icon="📈" 
           title="Real-Time Insights" 
@@ -85,6 +88,9 @@ export default function Home() {
           dark
         />
       </section>
+
+      {/* Testimonials */}
+      <Testimonials />
 
       <Footer />
     </div>

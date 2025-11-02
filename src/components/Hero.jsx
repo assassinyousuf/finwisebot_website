@@ -1,5 +1,6 @@
 import React from 'react'
 import dynamic from 'next/dynamic'
+import HeroIllustration from './HeroIllustration'
 
 const AmbientOrbs = dynamic(() => import('./AmbientOrbs'), { ssr: false })
 
@@ -42,13 +43,9 @@ export default function Hero({ landing = {}, user = null }) {
           <div className="px-4">
             <div className="flex justify-center md:justify-end">
               <div className="transform hover:scale-[1.02] transition-all duration-500 entrance">
-                <div className="bg-gradient-to-br from-slate-800/60 to-black/30 rounded-2xl p-4 shadow-2xl glass">
-                  {/* Showcase / demo area uses existing HeroShowcase and ChatWidget components inside index */}
-                  <div style={{ width: 520, maxWidth: '100%' }}>
-                    {/* Keep visual consistency by rendering placeholders that existing page will render next to Hero */}
-                    <div className="mb-4">
-                      {/* Hero showcase will be rendered by parent index if desired */}
-                    </div>
+                <div className="bg-gradient-to-br from-slate-800/60 to-black/30 rounded-2xl p-6 shadow-2xl glass flex items-center justify-center">
+                  <div style={{ width: 420, maxWidth: '100%' }}>
+                    <HeroIllustration />
                   </div>
                 </div>
               </div>
