@@ -140,6 +140,16 @@ export default function AdminPage() {
                   <button onClick={() => promote(u._id)} className="px-3 py-1 bg-green-600 text-white rounded">Promote</button>
                 )}
                 <button onClick={() => deleteUser(u._id)} className="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
+                <button onClick={async ()=>{
+                  const pwd = prompt('Enter new password for ' + (u.email||u._id) + ' (min 8 chars)')
+                  if (!pwd) return
+                  if (pwd.length < 8) { alert('Password too short'); return }
+                  try {
+                    const res = await fetch('/api/admin/users', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ id: u._id, action: 'resetPassword', newPassword: pwd }) })
+                    if (!res.ok) throw new Error('Reset failed')
+                    alert('Password reset successfully')
+                  } catch (e) { console.error(e); alert('Failed to reset password: ' + e.message) }
+                }} className="px-3 py-1 bg-blue-600 text-white rounded">Reset password</button>
               </div>
             </div>
           ))}

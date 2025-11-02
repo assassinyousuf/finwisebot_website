@@ -115,6 +115,63 @@ export default async function handler(req, res) {
     }
   }
 
+  // Request password reset: generate token, save expiry, and send email (dev: return token)
+  if (action === 'request_reset') {
+    const { email: reqEmail } = req.body || {}
+    if (!reqEmail) return res.status(400).json({ ok: false, error: 'email required' })
+    try {
+      const user = await User.findOne({ email: String(reqEmail).toLowerCase() })
+      if (!user) return res.status(404).json({ ok: false, error: 'User not found' })
+      const token = crypto.randomBytes(20).toString('hex')
+      user.resetToken = token
+      user.resetExpires = new Date(Date.now() + 1000 * 60 * 60) // 1 hour
+      await user.save()
+      // In production you'd send an email with a reset link containing the token
+      const resp = { ok: true, message: 'Password reset requested. Check your email.' }
+      if (process.env.NODE_ENV !== 'production') resp.resetToken = token
+      return res.status(200).json(resp)
+    } catch (err) {
+      console.error('request_reset error', err)
+      return res.status(500).json({ ok: false, error: 'Internal server error' })
+    }
+  }
+
+  // Reset password using token
+  if (action === 'reset_password') {
+    const { token, newPassword } = req.body || {}
+    if (!token || !newPassword) return res.status(400).json({ ok: false, error: 'token and newPassword required' })
+    if (typeof newPassword !== 'string' || newPassword.length < 8) return res.status(400).json({ ok: false, error: 'Password too weak' })
+    try {
+      const user = await User.findOne({ resetToken: String(token), resetExpires: { $gt: new Date() } })
+      if (!user) return res.status(400).json({ ok: false, error: 'Invalid or expired token' })
+      const bcrypt = await import('bcryptjs')
+      user.passwordHash = bcrypt.hashSync(newPassword, 10)
+      user.resetToken = undefined
+      user.resetExpires = undefined
+      await user.save()
+      // Optionally log the user in after reset
+      try {
+        const { signToken } = await import('../../lib/jwt')
+        const tokenJwt = signToken({ sub: user._id.toString(), email: user.email })
+        const cookie = await import('cookie')
+        const serialized = cookie.serialize('finwise_token', tokenJwt, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        })
+        res.setHeader('Set-Cookie', serialized)
+      } catch (e) {
+        // ignore
+      }
+      return res.status(200).json({ ok: true, message: 'Password reset' })
+    } catch (err) {
+      console.error('reset_password error', err)
+      return res.status(500).json({ ok: false, error: 'Internal server error' })
+    }
+  }
+
   if (action === 'logout') {
     try {
       const cookie = await import('cookie')

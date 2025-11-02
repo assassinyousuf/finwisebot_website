@@ -6,6 +6,9 @@ const UserSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   verified: { type: Boolean, default: false },
   verifyToken: { type: String },
+  // Password reset token and expiry (ms since epoch)
+  resetToken: { type: String },
+  resetExpires: { type: Date },
   roles: { type: [String], default: [] },
   lastLogin: { type: Date },
 })

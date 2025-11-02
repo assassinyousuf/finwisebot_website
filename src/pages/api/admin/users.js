@@ -30,6 +30,14 @@ export default async function handler(req, res) {
         user.roles = Array.from(new Set([...(user.roles||[]), 'admin']))
       } else if (action === 'demote') {
         user.roles = (user.roles||[]).filter(r => r !== 'admin')
+      } else if (action === 'resetPassword') {
+        const { newPassword } = req.body || {}
+        if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) return res.status(400).json({ ok: false, error: 'newPassword required (min 8 chars)' })
+        const bcrypt = await import('bcryptjs')
+        user.passwordHash = bcrypt.hashSync(newPassword, 10)
+        // clear any reset tokens
+        user.resetToken = undefined
+        user.resetExpires = undefined
       } else {
         return res.status(400).json({ ok: false, error: 'Unknown action' })
       }
