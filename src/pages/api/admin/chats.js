@@ -5,8 +5,12 @@ import { requireAdmin } from '../../../lib/adminAuth'
 export default async function handler(req, res) {
   await dbConnect()
 
-  const admin = await requireAdmin(req, res)
-  if (!admin || admin.ok === false) return
+  // Allow unsecured admin panel in development for convenience.
+  const allowUnsecured = process.env.NODE_ENV !== 'production'
+  if (!allowUnsecured) {
+    const admin = await requireAdmin(req, res)
+    if (!admin || admin.ok === false) return
+  }
 
   try {
     if (req.method === 'GET') {

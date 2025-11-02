@@ -7,15 +7,25 @@ export async function requireAdmin(req, res) {
   await dbConnect()
   const cookies = req.headers.cookie ? cookie.parse(req.headers.cookie) : {}
   const token = cookies.finwise_token
-  if (!token) return res.status(401).json({ ok: false, error: 'Not authenticated' })
+  if (!token) {
+    res.status(401).json({ ok: false, error: 'Not authenticated' })
+    return null
+  }
 
   const payload = verifyToken(token)
-  if (!payload) return res.status(401).json({ ok: false, error: 'Invalid or expired token' })
+  if (!payload) {
+    res.status(401).json({ ok: false, error: 'Invalid or expired token' })
+    return null
+  }
 
   const user = await User.findById(payload.sub)
-  if (!user) return res.status(404).json({ ok: false, error: 'User not found' })
+  if (!user) {
+    res.status(404).json({ ok: false, error: 'User not found' })
+    return null
+  }
   if (!Array.isArray(user.roles) || !user.roles.includes('admin')) {
-    return res.status(403).json({ ok: false, error: 'Admin role required' })
+    res.status(403).json({ ok: false, error: 'Admin role required' })
+    return null
   }
 
   // return the user document (without sensitive fields)

@@ -83,7 +83,12 @@ export default async function handler(req, res) {
       const match = bcrypt.compareSync(password, user.passwordHash)
       if (!match) return res.status(401).json({ ok: false, error: 'Invalid email or password' })
 
-      if (!user.verified) return res.status(403).json({ ok: false, error: 'Email not verified' })
+      if (!user.verified) {
+        if (process.env.NODE_ENV !== 'production') {
+          return res.status(403).json({ ok: false, error: 'Email not verified', verifyToken: user.verifyToken })
+        }
+        return res.status(403).json({ ok: false, error: 'Email not verified' })
+      }
 
       // Issue httpOnly JWT cookie on login
       try {
@@ -110,5 +115,77 @@ export default async function handler(req, res) {
     }
   }
 
+  if (action === 'logout') {
+    try {
+      const cookie = await import('cookie')
+      const serialized = cookie.serialize('finwise_token', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 0,
+      })
+      res.setHeader('Set-Cookie', serialized)
+      return res.status(200).json({ ok: true, message: 'Logged out' })
+    } catch (err) {
+      console.error('logout error', err)
+      return res.status(500).json({ ok: false, error: 'Logout failed' })
+    }
+  }
+
+  if (action === 'verify') {
+    // Verify a user's email using the verifyToken generated at signup.
+    const { token: vtoken } = req.body || {}
+    if (!vtoken) return res.status(400).json({ ok: false, error: 'Missing verification token' })
+    try {
+      const user = await User.findOne({ verifyToken: String(vtoken) })
+      if (!user) return res.status(404).json({ ok: false, error: 'Invalid or expired verification token' })
+      user.verified = true
+      user.verifyToken = undefined
+      await user.save()
+
+      // Optionally sign-in the user automatically by issuing cookie
+      try {
+        const { signToken } = await import('../../lib/jwt')
+        const token = signToken({ sub: user._id.toString(), email: user.email })
+        const cookie = await import('cookie')
+        const serialized = cookie.serialize('finwise_token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        })
+        res.setHeader('Set-Cookie', serialized)
+      } catch (e) {
+        // ignore cookie errors
+      }
+
+      return res.status(200).json({ ok: true, message: 'Email verified' })
+    } catch (err) {
+      console.error('verify error', err)
+      return res.status(500).json({ ok: false, error: 'Internal server error' })
+    }
+  }
+
   return res.status(400).json({ ok: false, error: 'Unknown action' })
+}
+
+// Support logout by clearing the finwise_token cookie
+export async function logoutHandler(req, res) {
+  try {
+    const cookie = await import('cookie')
+    const serialized = cookie.serialize('finwise_token', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 0,
+    })
+    res.setHeader('Set-Cookie', serialized)
+    return res.status(200).json({ ok: true, message: 'Logged out' })
+  } catch (err) {
+    console.error('logout error', err)
+    return res.status(500).json({ ok: false, error: 'Logout failed' })
+  }
 }

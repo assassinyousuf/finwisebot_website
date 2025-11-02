@@ -9,6 +9,8 @@ export default function AnimatedSignupForm() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
+  const [devVerifyToken, setDevVerifyToken] = useState(null)
+  const [verifying, setVerifying] = useState(false)
 
   const submit = async (e) => {
     e.preventDefault();
@@ -37,13 +39,17 @@ export default function AnimatedSignupForm() {
       } else {
         // For demo we may receive a verifyToken in dev
         let note = data.message || 'Account created — check your email to verify.'
-        if (data.verifyToken) note += `\n(DEV token: ${data.verifyToken})`
+        if (data.verifyToken) {
+          note += `\n(DEV token: ${data.verifyToken})`
+          setDevVerifyToken(data.verifyToken)
+        } else {
+          // redirect to homepage after a short pause so user sees confirmation
+          setTimeout(() => router.push('/'), 900)
+        }
         setMessage(note)
         setEmail('')
         setPassword('')
         setConfirm('')
-        // redirect to homepage after a short pause so user sees confirmation
-        setTimeout(() => router.push('/'), 900)
       }
     } catch (err) {
       console.error(err)
@@ -115,6 +121,32 @@ export default function AnimatedSignupForm() {
           </div>
 
           {message && <div className="mt-3 text-sm text-white/80">{message}</div>}
+          {devVerifyToken && (
+            <div className="mt-3 bg-white/5 p-3 rounded-md">
+              <div className="text-xs text-white/60 mb-2">Developer verify token (click to verify):</div>
+              <div className="flex items-center gap-2">
+                <input readOnly value={devVerifyToken} className="flex-1 p-2 rounded bg-black/10 text-xs text-white/80" />
+                <button onClick={async ()=>{
+                  setVerifying(true)
+                  try {
+                    const resp = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'verify', token: devVerifyToken }), credentials: 'include' })
+                    const j = await resp.json()
+                    if (resp.ok && j.ok) {
+                      setMessage('Email verified — signing in and redirecting...')
+                      setTimeout(()=>router.push('/'), 700)
+                    } else {
+                      setMessage(j.error || 'Verification failed')
+                    }
+                  } catch (e) {
+                    console.error('verify click error', e)
+                    setMessage('Verification failed — try again')
+                  } finally {
+                    setVerifying(false)
+                  }
+                }} className="bg-accent text-black px-3 py-2 rounded text-sm" disabled={verifying}>{verifying ? 'Verifying…' : 'Verify'}</button>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>

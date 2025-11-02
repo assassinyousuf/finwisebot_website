@@ -6,6 +6,8 @@ const ChatSchema = new mongoose.Schema({
   query: { type: String, required: true },
   answer: { type: String },
   meta: { type: mongoose.Schema.Types.Mixed },
+  // LLM metadata: provider/model/auth/raw response/status etc.
+  llm: { type: mongoose.Schema.Types.Mixed },
   createdAt: { type: Date, default: Date.now },
 })
 

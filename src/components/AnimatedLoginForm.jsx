@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router'
 
 export default function AnimatedLoginForm() {
   const [email, setEmail] = useState('');
@@ -7,16 +8,30 @@ export default function AnimatedLoginForm() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
+  const router = useRouter()
+
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
     try {
-      // placeholder: mimic API call
-      await new Promise((r) => setTimeout(r, 800));
-      setMessage('Login succeeded (demo)');
+      const resp = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', email, password }),
+        credentials: 'include'
+      })
+      const data = await resp.json()
+      if (!resp.ok) {
+        setMessage(data.error || 'Login failed')
+      } else {
+        setMessage('Login succeeded')
+        // redirect to main page
+        router.push('/')
+      }
     } catch (err) {
-      setMessage('Login failed');
+      console.error('login submit error', err)
+      setMessage('Login failed — please try again')
     } finally {
       setLoading(false);
     }

@@ -31,6 +31,7 @@ export default function Demo() {
     // Call placeholder backend API
     const response = await fetch('/api/chat', {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: input })
     });
