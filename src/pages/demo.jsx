@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatWidget from '../components/ChatWidget';
+import { useRouter } from 'next/router'
 
 // Dynamically load heavy visual components client-side to reduce initial bundle size
 const DemoVisualizer = dynamic(() => import('../components/DemoVisualizer'), {
@@ -15,7 +16,9 @@ const DemoVisualizer = dynamic(() => import('../components/DemoVisualizer'), {
 const DemoBackground = dynamic(() => import('../components/DemoBackground'), { ssr: false });
 
 export default function Demo() {
-  // Demo now uses unified ChatWidget (PeekoChat)
+  // Redirect /demo to canonical /peekochat and keep a small signal bridge
+  const router = useRouter()
+  useEffect(() => { router.replace('/peekochat') }, [router])
 
   function handleSignalClick(signal) {
     // dispatch a cross-component event that ChatWidget listens for
