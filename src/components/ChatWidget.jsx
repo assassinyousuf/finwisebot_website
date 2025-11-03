@@ -141,10 +141,7 @@ export default function ChatWidget() {
           <div className="flex items-center gap-3">
             {/* icon: use /peekochat.png if available, otherwise fallback to initials avatar */}
             <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-800 flex items-center justify-center">
-              <img src="/peekochat.png" alt="PeekoChat" onError={(e)=>{ e.currentTarget.style.display='none' }} className="w-full h-full object-cover" />
-              <div className="-ml-10">
-                {/* hidden fallback content - Avatar will show if image removed */}
-              </div>
+              <img src="/peekochat.png" alt="PeekoChat" onError={(e)=>{ e.currentTarget.onerror=null; e.currentTarget.src='/peekochat.svg' }} className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="text-sm font-semibold text-white">PeekoChat</div>
