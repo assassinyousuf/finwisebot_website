@@ -37,17 +37,15 @@ export default function Navbar() {
           <Link href="/" className="hover:text-white transition">Home</Link>
           <Link href="/features" className="hover:text-white transition">Features</Link>
           <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
-          <Link href="/demo" className="hover:text-white transition">Demo</Link>
+          <Link href="/demo" className="hover:text-white transition">PeekoChat</Link>
           {/* Admin link shown only if user has admin role */}
           {user && user.roles && user.roles.includes('admin') && (
             <Link href="/admin" className="hover:text-white transition">Admin</Link>
           )}
-          {user && (
-            <>
-              <Link href="/reports" className="hover:text-white transition">Reports</Link>
-              <Link href="/settings" className="hover:text-white transition">Settings</Link>
-            </>
+          {!user && (
+            <Link href="/reports" className="hover:text-white transition">Reports</Link>
           )}
+          <Link href="/settings" className="hover:text-white transition">Settings</Link>
         </div>
         <div className="hidden md:flex items-center gap-3">
             {user ? (
@@ -83,8 +81,8 @@ export default function Navbar() {
             <Link href="/">Home</Link>
             <Link href="/features">Features</Link>
             <Link href="/pricing">Pricing</Link>
-            <Link href="/demo">Demo</Link>
-            <Link href="/reports">Reports</Link>
+            <Link href="/demo">PeekoChat</Link>
+            {!user && <Link href="/reports">Reports</Link>}
             <Link href="/settings">Settings</Link>
             {user ? (
               <>
@@ -94,7 +92,6 @@ export default function Navbar() {
                   setUser(null)
                   window.location.href = '/'
                 }} className="text-left text-sm text-white/70">Logout</button>
-                <Link href="/reports" className="text-left text-sm text-white/70">Reports</Link>
                 <Link href="/settings" className="mt-2 bg-accent text-black px-4 py-2 rounded-lg text-sm font-semibold">Settings</Link>
               </>
             ) : (

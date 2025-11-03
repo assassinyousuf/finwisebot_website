@@ -71,6 +71,9 @@ export default function Demo() {
       <DemoBackground />
       <Navbar />
       <main className="flex-1 p-6 max-w-6xl mx-auto flex gap-6">
+        <div className="w-full">
+          <h1 className="text-2xl font-semibold mb-4">PeekoChat</h1>
+        </div>
         <section className="flex-1 flex flex-col bg-slate-800/40 rounded-xl p-4 shadow-lg">
           <div className="mb-2 flex gap-2">
             {quickActions.map((q, i) => (

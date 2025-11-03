@@ -41,7 +41,7 @@ export default function HeroShowcase() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex-1 bg-accent text-black font-semibold py-2 rounded-lg">Open Demo</button>
+          <button className="flex-1 bg-accent text-black font-semibold py-2 rounded-lg">Open PeekoChat</button>
           <button className="px-3 py-2 border border-white/10 rounded-lg text-white/90">Details</button>
         </div>
       </div>

@@ -50,7 +50,7 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-heading">Settings</h1>
         <div className="flex gap-3">
           <Link href="/" className="text-sm text-white/80">Home</Link>
-          <Link href="/reports" className="text-sm text-white/80">Reports</Link>
+          {!user && <Link href="/reports" className="text-sm text-white/80">Reports</Link>}
         </div>
       </div>
 
