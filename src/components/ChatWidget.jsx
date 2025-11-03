@@ -1,6 +1,28 @@
 import { useState, useRef, useEffect } from 'react'
 import mockApi from '../lib/mockApi'
 
+function Avatar({ who }){
+  const text = (who === 'user') ? 'U' : (who === 'bot') ? 'P' : 'S'
+  return (
+    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-700 text-sm font-semibold text-white">{text}</div>
+  )
+}
+
+function MessageBubble({ m, isUser }){
+  const base = `px-3 py-2 rounded-lg max-w-[86%] whitespace-pre-wrap text-sm`
+  if (m.from === 'system') return (<div className="mx-auto text-xs text-slate-400 px-3 py-2">{m.text}</div>)
+  return (
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}> 
+      {!isUser && <div className="mr-3"><Avatar who={m.from} /></div>}
+      <div className={`${base} ${isUser ? 'bg-emerald-500 text-black' : 'bg-slate-800/60 text-slate-200'}`} aria-live="polite">
+        <div>{m.text}</div>
+        {m.createdAt && <div className="text-[10px] text-slate-400 mt-1 text-right">{new Date(m.createdAt).toLocaleTimeString()}</div>}
+      </div>
+      {isUser && <div className="ml-3"><Avatar who={m.from} /></div>}
+    </div>
+  )
+}
+
 export default function ChatWidget() {
   const [messages, setMessages] = useState([])
   const [user, setUser] = useState(null)
@@ -11,6 +33,7 @@ export default function ChatWidget() {
   const fileRef = useRef(null)
   const scrollRef = useRef(null)
   const [showActions, setShowActions] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     // auto-scroll when messages change
@@ -44,6 +67,7 @@ export default function ChatWidget() {
       }
     }
     if (!messages.length) init()
+    setMounted(true)
     return () => { mounted = false }
   }, [])
 
@@ -107,15 +131,18 @@ export default function ChatWidget() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4">
-      <div className="glass rounded-2xl p-4 shadow-xl relative" style={{minHeight: 360}}>
-        {/* Compact header with actions popover */}
+    <div className="w-full max-w-3xl mx-auto p-3">
+      <div className="glass rounded-2xl p-4 shadow-xl relative" style={{minHeight: 420}}>
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <div className="text-sm font-semibold text-white">PeekoChat</div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm font-semibold text-white">PeekoChat</div>
+            <div className="text-xs text-slate-400">AI financial assistant</div>
+          </div>
           <div className="relative">
-            <button onClick={() => setShowActions(s => !s)} aria-expanded={showActions} className="px-3 py-1 rounded-md badge-soft">Actions ▾</button>
+            <button onClick={() => setShowActions(s => !s)} aria-expanded={showActions} className="px-3 py-1 rounded-md badge-soft">Quick ▾</button>
             {showActions && (
-              <div className="absolute right-0 mt-2 w-64 bg-slate-900/80 border border-slate-700 rounded-lg p-3 shadow-lg z-40">
+              <div className="absolute right-0 mt-2 w-64 bg-slate-900/90 border border-slate-700 rounded-lg p-3 shadow-lg z-40">
                 <div className="flex flex-col gap-2">
                   <button onClick={() => { quickAction('Summarize Apple 10-Q'); setShowActions(false) }} className="text-left badge-soft">Summarize Apple 10-Q</button>
                   <button onClick={() => { quickAction('Generate signal for NVDA'); setShowActions(false) }} className="text-left badge-soft">Generate signal for NVDA</button>
@@ -130,45 +157,65 @@ export default function ChatWidget() {
           </div>
         </div>
 
-        {/* Chat area */}
-        <div ref={scrollRef} className="flex flex-col gap-3 h-72 overflow-auto p-3" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.02), transparent)'}}>
+        {/* Messages list */}
+        <div ref={scrollRef} className="flex flex-col gap-3 h-80 overflow-auto p-3" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.02), transparent)'}} role="log" aria-live="polite">
           {messages.length === 0 && (
-            <div className="text-center text-muted py-12">Try one of the actions above or ask a question below.</div>
+            <div className="text-center text-slate-400 py-10">Try a quick action or ask a question — e.g. "Summarize AAPL's latest earnings"</div>
           )}
 
           {messages.map((m, i) => (
-            <div key={i} className={`max-w-[85%] px-3 py-2 rounded-lg ${m.from === 'user' ? 'ml-auto' : (m.from === 'bot' ? 'mr-auto' : 'mx-auto')}`} style={{background: m.from === 'user' ? 'var(--accent)' : m.from === 'bot' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.02)', color: m.from === 'user' ? 'var(--text-on-accent)' : 'var(--text-primary)'}}>
-              <div className="text-sm whitespace-pre-wrap">{m.text}</div>
-              {m.createdAt && <div className="text-[10px] text-muted mt-1">{new Date(m.createdAt).toLocaleTimeString()}</div>}
-            </div>
+            <MessageBubble key={i} m={m} isUser={m.from === 'user'} />
           ))}
+
+          {/* Typing / thinking indicator */}
+          {sending && (
+            <div className="flex items-center gap-3">
+              <div className="ml-11">
+                <div className="px-3 py-2 bg-slate-800/60 text-slate-200 rounded-lg inline-block">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse delay-75" />
+                    <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse delay-150" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Input area */}
+        {/* Input bar */}
         <div className="mt-4 flex items-center gap-3">
-          <input
+          <button className="p-2 rounded-md bg-slate-700/10" title="Attach file" onClick={()=>fileRef.current && fileRef.current.click()}>
+            📎
+            <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
+          </button>
+
+          <textarea
             value={input}
             onChange={e=>setInput(e.target.value)}
             onKeyDown={e=>{ if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-            placeholder="Ask about a stock or financial report..."
-            className="input flex-1"
+            placeholder="Ask about a stock, upload a report, or try a quick action..."
+            className="input flex-1 h-10 resize-none"
             aria-label="chat-input"
-            rows={1}
           />
 
           <div className="flex items-center gap-2">
-            <label className="inline-flex items-center px-3 py-2 rounded-md bg-slate-700/20 cursor-pointer text-sm" title="Upload PDF/CSV">
-              <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
-              Upload
-            </label>
-            <button onClick={() => send()} disabled={sending} className="btn-cta px-4 py-2">{sending ? 'Thinking…' : 'Send'}</button>
-            <button onClick={exportChat} className="cta-ghost px-4 py-2">Export Chat</button>
+            <button onClick={() => send()} disabled={sending || !mounted} className="btn-cta px-4 py-2">{sending ? 'Thinking…' : 'Send'}</button>
+            <button onClick={exportChat} className="cta-ghost px-3 py-2">Export</button>
           </div>
         </div>
 
+        {/* Attachment preview */}
+        {uploadName && (
+          <div className="mt-3 p-3 rounded-md bg-slate-800/40 border border-slate-700 text-sm text-slate-200 flex items-center justify-between">
+            <div>{uploadName}</div>
+            <div className="text-xs text-slate-400">Preview available</div>
+          </div>
+        )}
+
         {/* Optional small preview area for uploaded content */}
         {historyPreview && (
-          <div className="mt-3 p-3 rounded-md bg-black/5 text-sm text-muted">{historyPreview}</div>
+          <div className="mt-3 p-3 rounded-md bg-black/5 text-sm text-slate-300">{historyPreview}</div>
         )}
       </div>
     </div>
