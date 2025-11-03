@@ -152,6 +152,64 @@ function Trending(){
     </div>
   )
 }
+
+function SearchBar(){
+  const [q, setQ] = useState('')
+  const [result, setResult] = useState(null)
+
+  function performSearch() {
+    const symbol = (q || '').trim().toUpperCase()
+    if (!symbol) return
+    // synthetic demo quote
+    const price = +(100 + Math.random()*900).toFixed(2)
+    const change = ((Math.random()*2-1)).toFixed(2)
+    const sparkValues = Array.from({length:12}).map(()=>price - (Math.random()*6))
+    const res = { symbol, price, change, sparkValues }
+    setResult(res)
+  }
+
+  function addToWatchlist(sym){
+    try{
+      const key = 'fw_watchlist'
+      const cur = JSON.parse(localStorage.getItem(key) || '[]')
+      if (!cur.find(x=>x.symbol===sym)) cur.push({ symbol: sym, price: (+((100+Math.random()*900).toFixed(2))), change: (Math.random()*2-1).toFixed(2) })
+      localStorage.setItem(key, JSON.stringify(cur))
+      alert(`${sym} added to watchlist (demo).`)
+    } catch(e){ console.warn(e); alert('Failed to add') }
+  }
+
+  function openInPeekoChat(sym){
+    try { localStorage.setItem('peek_selected', sym) } catch(e){}
+    // navigate to demo (PeekoChat)
+    window.location.href = '/demo'
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 bg-slate-800/10 border border-slate-700 rounded-full px-4 py-2">
+        <input aria-label="Search ticker" value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter') performSearch() }} className="flex-1 bg-transparent placeholder:text-slate-500 text-white px-3 py-3 rounded-full focus:outline-none" placeholder="Search (e.g. AAPL, TSLA)" />
+        <button onClick={performSearch} className="px-4 py-2 rounded-full bg-emerald-500 text-black font-semibold">Search</button>
+      </div>
+
+      {result && (
+        <div className="mt-4 bg-slate-900/40 border border-slate-700 rounded-lg p-4 flex items-center justify-between gap-4">
+          <div>
+            <div className="text-sm text-slate-400">{result.symbol}</div>
+            <div className="text-2xl font-semibold">${result.price}</div>
+            <div className={`text-sm ${result.change.startsWith('-') ? 'text-rose-400' : 'text-emerald-400'}`}>{result.change}%</div>
+          </div>
+          <div className="flex-1">
+            {generateSparkline(result.sparkValues, 160, 40)}
+          </div>
+          <div className="flex flex-col gap-2">
+            <button onClick={()=>addToWatchlist(result.symbol)} className="px-3 py-2 bg-slate-700/40 rounded text-sm">Add to Watchlist</button>
+            <button onClick={()=>openInPeekoChat(result.symbol)} className="px-3 py-2 bg-emerald-500 rounded text-sm text-black font-semibold">Open in PeekoChat</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 export default function Home() {
   const [landing, setLanding] = useState(null)
   const [user, setUser] = useState(null)
@@ -188,10 +246,7 @@ export default function Home() {
 
           {/* Centered search */}
           <div className="mt-8">
-            <div className="flex items-center gap-3 bg-slate-800/10 border border-slate-700 rounded-full px-4 py-2">
-              <input aria-label="Search ticker" className="flex-1 bg-transparent placeholder:text-slate-500 text-white px-3 py-3 rounded-full focus:outline-none" placeholder="Search (e.g. AAPL, TSLA)" />
-              <button className="px-4 py-2 rounded-full bg-emerald-500 text-black font-semibold">Search</button>
-            </div>
+            <SearchBar />
           </div>
 
           {/* Live news section */}

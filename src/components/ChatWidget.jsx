@@ -3,6 +3,7 @@ import mockApi from '../lib/mockApi'
 
 export default function ChatWidget() {
   const [messages, setMessages] = useState([])
+  const [user, setUser] = useState(null)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [uploadName, setUploadName] = useState(null)
@@ -14,6 +15,36 @@ export default function ChatWidget() {
     // auto-scroll when messages change
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [messages])
+
+  // PeekoChat onboarding and preselected symbol handling
+  useEffect(() => {
+    let mounted = true
+    async function init() {
+      try {
+        const j = await mockApi.getMe()
+        if (j && j.ok && mounted) {
+          setUser(j.user)
+          const seenKey = `peek_seen_${j.user.id || j.user._id || j.user.email}`
+          const seen = localStorage.getItem(seenKey)
+          const selected = localStorage.getItem('peek_selected')
+          if (selected) {
+            // clear and insert a helpful starting message
+            localStorage.removeItem('peek_selected')
+            setMessages(m => [...m, { from: 'system', text: `Peeking at ${selected} — open a chat to ask for a summary or signals.` }])
+          }
+          if (!seen) {
+            // first time onboarding
+            setMessages(m => [...m, { from: 'system', text: `Welcome to PeekoChat — ask about a stock (symbol or company name) or use the quick actions to get started.` }])
+            localStorage.setItem(seenKey, '1')
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    if (!messages.length) init()
+    return () => { mounted = false }
+  }, [])
 
   async function send(query) {
     const q = (typeof query === 'string') ? query : input.trim()
