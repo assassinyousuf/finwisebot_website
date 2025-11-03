@@ -100,20 +100,20 @@ function NewsList(){
 
 function LiveNews(){
   const samples = [
-    { text: 'AAPL up 2.3% after stronger-than-expected guidance', ticker: 'AAPL' },
-    { text: 'TSLA announces new battery partnership, shares jump', ticker: 'TSLA' },
+    { text: 'AAPL up after stronger-than-expected guidance', ticker: 'AAPL' },
+    { text: 'TSLA announces new battery partnership', ticker: 'TSLA' },
     { text: 'NVDA extends rally on AI chip demand', ticker: 'NVDA' },
     { text: 'MSFT sees steady cloud growth in Q3', ticker: 'MSFT' },
   ]
   // Avoid rendering timestamps during SSR to prevent hydration mismatches.
   const [mounted, setMounted] = useState(false)
-  const [feed, setFeed] = useState(() => samples.map((s,i)=>({ ...s, id: i, time: Date.now() - (i*60000) })))
+  const [feed, setFeed] = useState(() => samples.map((s,i)=>({ ...s, id: i, time: Date.now() - (i*60000), price: +(100 + Math.random()*900).toFixed(2), change: ((Math.random()*2-1)).toFixed(2), sparkValues: Array.from({length:8}).map(()=>100+Math.random()*40) })))
 
   useEffect(() => {
     setMounted(true)
     const t = setInterval(() => {
       const item = samples[Math.floor(Math.random()*samples.length)]
-      const rec = { ...item, id: Date.now(), time: Date.now() }
+      const rec = { ...item, id: Date.now(), time: Date.now(), price: +(100 + Math.random()*900).toFixed(2), change: ((Math.random()*2-1)).toFixed(2), sparkValues: Array.from({length:8}).map(()=>100+Math.random()*40) }
       setFeed(f => [rec, ...f].slice(0, 8))
     }, 5000)
     return () => clearInterval(t)
@@ -122,12 +122,54 @@ function LiveNews(){
   return (
     <div className="space-y-2">
       {feed.map(f => (
-        <div key={f.id} className="flex items-start justify-between p-3 rounded-md bg-slate-900/30">
-          <div>
-            <div className="text-sm text-slate-200">{f.text}</div>
-            <div className="text-xs text-slate-400 mt-1">{f.ticker}{mounted ? ` · ${new Date(f.time).toLocaleTimeString()}` : ''}</div>
+        <div key={f.id} className="flex items-center justify-between p-3 rounded-md bg-slate-900/30">
+          <div className="flex items-center gap-3">
+            <div className="w-16">
+              <div className="text-sm font-semibold text-white">{f.ticker}</div>
+              <div className={`text-xs ${Number(f.change) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{Number(f.change) >= 0 ? '+' : ''}{Number(f.change).toFixed(2)}%</div>
+            </div>
+            <div className="flex flex-col">
+              <div className="text-sm text-slate-200">{f.text}</div>
+              <div className="text-xs text-slate-400 mt-1">{mounted ? `${new Date(f.time).toLocaleTimeString()}` : ''}</div>
+            </div>
           </div>
-          <div className="ml-4 text-xs text-emerald-300 font-semibold">LIVE</div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-white font-semibold">${f.price}</div>
+            <div className="w-20">
+              {generateSparkline(f.sparkValues, 80, 28)}
+            </div>
+            <div className="ml-2 text-xs text-emerald-300 font-semibold">LIVE</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function MarketOverview(){
+  const indices = [
+    { name: 'S&P 500', ticker: '^GSPC' },
+    { name: 'Dow 30', ticker: '^DJI' },
+    { name: 'Nasdaq', ticker: '^IXIC' },
+    { name: 'Russell 2000', ticker: '^RUT' },
+    { name: 'VIX', ticker: '^VIX' },
+    { name: 'Gold', ticker: 'GC=F' },
+  ]
+  const data = indices.map(i => ({ ...i, price: +(1000 + Math.random()*9000).toFixed(2), change: (Math.random()*2-1).toFixed(2), spark: Array.from({length:12}).map(()=>100+Math.random()*40) }))
+  return (
+    <div className="mt-6 grid grid-cols-2 gap-3">
+      {data.map(d => (
+        <div key={d.ticker} className="bg-slate-900/40 border border-slate-700 rounded-lg p-3">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="text-xs text-slate-400">{d.name}</div>
+              <div className="text-lg font-semibold text-white">{d.price}</div>
+            </div>
+            <div className={`text-sm font-semibold ${Number(d.change) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{Number(d.change) >= 0 ? '+' : ''}{Number(d.change).toFixed(2)}%</div>
+          </div>
+          <div className="mt-2">
+            {generateSparkline(d.spark, 180, 40)}
+          </div>
         </div>
       ))}
     </div>
@@ -249,8 +291,12 @@ export default function Home() {
             <SearchBar />
           </div>
 
-          {/* Live news section */}
-          <div className="mt-10 text-left">
+          {/* Market overview + Live news */}
+          <div className="mt-8 text-left w-full">
+            <MarketOverview />
+          </div>
+
+          <div className="mt-8 text-left w-full">
             <h3 className="text-lg font-semibold text-white mb-3">Live Market Updates</h3>
             <LiveNews />
           </div>
