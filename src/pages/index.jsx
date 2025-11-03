@@ -98,6 +98,39 @@ function NewsList(){
   )
 }
 
+function LiveNews(){
+  const samples = [
+    { text: 'AAPL up 2.3% after stronger-than-expected guidance', ticker: 'AAPL' },
+    { text: 'TSLA announces new battery partnership, shares jump', ticker: 'TSLA' },
+    { text: 'NVDA extends rally on AI chip demand', ticker: 'NVDA' },
+    { text: 'MSFT sees steady cloud growth in Q3', ticker: 'MSFT' },
+  ]
+  const [feed, setFeed] = useState(() => samples.map((s,i)=>({ ...s, id: i, time: Date.now() - (i*60000) })))
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      const item = samples[Math.floor(Math.random()*samples.length)]
+      const rec = { ...item, id: Date.now(), time: Date.now() }
+      setFeed(f => [rec, ...f].slice(0, 8))
+    }, 5000)
+    return () => clearInterval(t)
+  }, [])
+
+  return (
+    <div className="space-y-2">
+      {feed.map(f => (
+        <div key={f.id} className="flex items-start justify-between p-3 rounded-md bg-slate-900/30">
+          <div>
+            <div className="text-sm text-slate-200">{f.text}</div>
+            <div className="text-xs text-slate-400 mt-1">{f.ticker} · {new Date(f.time).toLocaleTimeString()}</div>
+          </div>
+          <div className="ml-4 text-xs text-emerald-300 font-semibold">LIVE</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function Trending(){
   const tickers = ['AAPL','TSLA','NVDA','MSFT','AMZN']
   return (
@@ -144,72 +177,43 @@ export default function Home() {
 
       <Navbar />
 
-      {/* YFinance-like homepage */}
-      <main className="container mx-auto px-6 pt-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Search bar */}
-          <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4 mb-6">
-            <div className="flex items-center gap-4">
-              <input aria-label="Search ticker" className="flex-1 bg-transparent placeholder:text-slate-400 text-white px-4 py-3 rounded-lg border border-slate-700 focus:outline-none" placeholder="Search symbol, company name, or keyword (e.g. AAPL, Tesla)" value={''} onChange={()=>{}} />
-              <button className="inline-flex items-center px-4 py-2 bg-emerald-500 hover:bg-emerald-400 rounded-md text-black font-semibold">Search</button>
+      {/* Minimalistic homepage */}
+      <main className="min-h-[70vh] flex flex-col items-center justify-start py-16 px-6">
+        <div className="w-full max-w-3xl text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white">FinWisebot</h1>
+          <p className="mt-4 text-lg text-slate-400">Market intelligence made simple. Peek into stocks, learn, and get advice.</p>
+
+          {/* Centered search */}
+          <div className="mt-8">
+            <div className="flex items-center gap-3 bg-slate-800/10 border border-slate-700 rounded-full px-4 py-2">
+              <input aria-label="Search ticker" className="flex-1 bg-transparent placeholder:text-slate-500 text-white px-3 py-3 rounded-full focus:outline-none" placeholder="Search (e.g. AAPL, TSLA)" />
+              <button className="px-4 py-2 rounded-full bg-emerald-500 text-black font-semibold">Search</button>
             </div>
-            <div className="mt-3 text-sm text-slate-400">Try: AAPL, MSFT, TSLA — demo search performs a synthetic lookup using the frontend mock API.</div>
           </div>
 
-          {/* Market summary tiles */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            {[
-              { name: 'S&P 500', value: '4,567.23', change: '+0.72%' },
-              { name: 'Dow Jones', value: '35,123.45', change: '-0.12%' },
-              { name: 'Nasdaq', value: '13,789.12', change: '+1.04%' },
-            ].map((m) => (
-              <div key={m.name} className="bg-gradient-to-br from-slate-800/60 to-black/30 rounded-lg p-4 border border-slate-700">
-                <div className="flex items-baseline justify-between">
-                  <div>
-                    <div className="text-sm text-slate-400">{m.name}</div>
-                    <div className="mt-1 text-2xl font-semibold text-white">{m.value}</div>
-                  </div>
-                  <div className={`text-sm font-semibold ${m.change.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>{m.change}</div>
-                </div>
-                <div className="mt-3 h-8 bg-slate-700/40 rounded-md"></div>
-              </div>
-            ))}
+          {/* Live news section */}
+          <div className="mt-10 text-left">
+            <h3 className="text-lg font-semibold text-white mb-3">Live Market Updates</h3>
+            <LiveNews />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left column: Watchlist + News */}
-            <div className="lg:col-span-2">
-              <div className="bg-slate-800/30 rounded-xl border border-slate-700 p-4 mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold">Watchlist</h3>
-                  <div className="text-sm text-slate-400">Prices are simulated</div>
-                </div>
+          {/* PeekoChat section */}
+          <div className="mt-10 text-left w-full">
+            <h3 className="text-lg font-semibold text-white mb-2">PeekoChat</h3>
+            <p className="text-sm text-slate-400 mb-4">Peek into stocks, learn about them, and get advice from the chat. Login to start a PeekoChat session.</p>
 
-                <Watchlist />
-              </div>
-
-              <div className="bg-slate-800/20 rounded-xl border border-slate-700 p-4">
-                <h3 className="text-lg font-semibold mb-3">Latest News</h3>
-                <NewsList />
-              </div>
-            </div>
-
-            {/* Right column: Trending tickers / mini charts */}
             <div>
-              <div className="bg-slate-800/20 rounded-xl border border-slate-700 p-4 mb-6">
-                <h4 className="text-sm text-slate-300 font-semibold mb-3">Trending Tickers</h4>
-                <Trending />
-              </div>
-
-              <div className="bg-slate-800/20 rounded-xl border border-slate-700 p-4">
-                <h4 className="text-sm text-slate-300 font-semibold mb-3">Quick Prediction</h4>
-                <PredictionWidget />
-              </div>
+              {user ? (
+                <div>
+                  <ChatWidget />
+                </div>
+              ) : (
+                <div className="bg-slate-800/20 rounded-lg p-6 border border-slate-700 text-center">
+                  <p className="text-slate-300 mb-4">Please log in to use PeekoChat.</p>
+                  <a href="/login" className="inline-flex items-center px-4 py-2 bg-emerald-500 text-black rounded-md font-semibold">Log in</a>
+                </div>
+              )}
             </div>
-          </div>
-
-          <div className="mt-12">
-            <Testimonials />
           </div>
         </div>
       </main>
