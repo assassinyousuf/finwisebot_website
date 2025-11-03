@@ -1,28 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import mockApi from '../lib/mockApi'
 
-function Avatar({ who }){
-  const text = (who === 'user') ? 'U' : (who === 'bot') ? 'P' : 'S'
-  return (
-    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-700 text-sm font-semibold text-white">{text}</div>
-  )
-}
-
-function MessageBubble({ m, isUser }){
-  const base = `px-3 py-2 rounded-lg max-w-[86%] whitespace-pre-wrap text-sm`
-  if (m.from === 'system') return (<div className="mx-auto text-xs text-slate-400 px-3 py-2">{m.text}</div>)
-  return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}> 
-      {!isUser && <div className="mr-3"><Avatar who={m.from} /></div>}
-      <div className={`${base} ${isUser ? 'bg-emerald-500 text-black' : 'bg-slate-800/60 text-slate-200'}`} aria-live="polite">
-        <div>{m.text}</div>
-        {m.createdAt && <div className="text-[10px] text-slate-400 mt-1 text-right">{new Date(m.createdAt).toLocaleTimeString()}</div>}
-      </div>
-      {isUser && <div className="ml-3"><Avatar who={m.from} /></div>}
-    </div>
-  )
-}
-
 export default function ChatWidget() {
   const [messages, setMessages] = useState([])
   const [user, setUser] = useState(null)
@@ -33,7 +11,6 @@ export default function ChatWidget() {
   const fileRef = useRef(null)
   const scrollRef = useRef(null)
   const [showActions, setShowActions] = useState(false)
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     // auto-scroll when messages change
@@ -67,7 +44,6 @@ export default function ChatWidget() {
       }
     }
     if (!messages.length) init()
-    setMounted(true)
     return () => { mounted = false }
   }, [])
 
@@ -131,114 +107,68 @@ export default function ChatWidget() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-3">
-      <div className="glass rounded-2xl p-4 shadow-xl relative overflow-hidden" style={{minHeight: 420}}>
-        {/* decorative accent */}
-        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-emerald-500/10 pointer-events-none filter blur-xl" />
-        <div className="absolute left-4 top-4 w-12 h-1 rounded-full bg-emerald-500/30" />
-        {/* Header */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            {/* icon: use /peekochat.png if available, otherwise fallback to initials avatar */}
-            <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-800 flex items-center justify-center">
-              {/* Inline SVG to guarantee icon renders without an extra network request */}
-              <svg viewBox="0 0 256 256" width="40" height="40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <defs>
-                  <linearGradient id="g2" x1="0" x2="1">
-                    <stop offset="0%" stopColor="#60E0A6" />
-                    <stop offset="100%" stopColor="#2ABF9F" />
-                  </linearGradient>
-                </defs>
-                <rect width="100%" height="100%" rx="28" fill="#0b1220" />
-                <g transform="translate(20,20) scale(0.8)">
-                  <circle cx="80" cy="48" r="44" fill="#ffd966" stroke="#f6c84c" strokeWidth="3" />
-                  <circle cx="96" cy="44" r="6" fill="#2b2b2b" />
-                  <path d="M56 28 C44 12, 30 8, 34 32 C36 44, 46 36, 56 28" fill="#ffd966" stroke="#f6c84c" strokeWidth="2"/>
-                  <path d="M64 60 L80 56 L74 48 Z" fill="#8b8b8b" />
-                  <rect x="120" y="10" width="80" height="56" rx="8" fill="url(#g2)" />
-                  <circle cx="148" cy="38" r="4" fill="#fff" />
-                  <circle cx="164" cy="38" r="4" fill="#fff" />
-                  <circle cx="180" cy="38" r="4" fill="#fff" />
-                  <rect x="8" y="110" width="18" height="36" rx="3" fill="#2abf9f" />
-                  <rect x="34" y="92" width="18" height="54" rx="3" fill="#60e0a6" />
-                  <rect x="60" y="72" width="18" height="74" rx="3" fill="#2abf9f" />
-                </g>
-              </svg>
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-white">PeekoChat</div>
-              <div className="text-xs text-slate-400">AI financial assistant</div>
-            </div>
+    <div className="w-full max-w-4xl mx-auto p-4">
+      <div className="glass rounded-2xl p-4 shadow-xl relative" style={{minHeight: 360}}>
+        {/* Compact header with actions popover */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm font-semibold text-white">PeekoChat</div>
+          <div className="relative">
+            <button onClick={() => setShowActions(s => !s)} aria-expanded={showActions} className="px-3 py-1 rounded-md badge-soft">Actions ▾</button>
+            {showActions && (
+              <div className="absolute right-0 mt-2 w-64 bg-slate-900/80 border border-slate-700 rounded-lg p-3 shadow-lg z-40">
+                <div className="flex flex-col gap-2">
+                  <button onClick={() => { quickAction('Summarize Apple 10-Q'); setShowActions(false) }} className="text-left badge-soft">Summarize Apple 10-Q</button>
+                  <button onClick={() => { quickAction('Generate signal for NVDA'); setShowActions(false) }} className="text-left badge-soft">Generate signal for NVDA</button>
+                  <button onClick={() => { quickAction('Backtest strategy X'); setShowActions(false) }} className="text-left badge-soft">Backtest strategy X</button>
+                  <label className="cursor-pointer badge-soft text-left" onClick={() => setShowActions(false)}>
+                    Upload PDF/CSV
+                    <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
+                  </label>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="text-xs text-slate-400">{user ? user.email || user.name : ''}</div>
         </div>
 
-        {/* Quick actions removed as requested (upload is available via paperclip). */}
-
-        {/* Messages list (flex-grow) */}
-        <div ref={scrollRef} className="flex-1 flex flex-col gap-3 overflow-auto p-3" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.02), transparent)'}} role="log" aria-live="polite">
+        {/* Chat area */}
+        <div ref={scrollRef} className="flex flex-col gap-3 h-72 overflow-auto p-3" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.02), transparent)'}}>
           {messages.length === 0 && (
-            <div className="mx-auto my-6 w-full max-w-lg p-4 rounded-md bg-slate-900/40 border border-slate-700 text-slate-300">
-              <div className="text-sm font-semibold text-white mb-2">Welcome to PeekoChat</div>
-              <div className="text-sm text-slate-300 mb-3">Try one of these quick actions or ask a question.</div>
-              <div className="text-sm text-slate-300 mb-3">Try commands like: Summarize AAPL 10-Q, Generate signal for NVDA, or Upload a report using the paperclip.</div>
-              <div className="text-xs text-slate-400 mt-3">Examples: "Summarize AAPL earnings", "What is the sentiment on NVDA?", "Backtest strategy with moving average crossover"</div>
-            </div>
+            <div className="text-center text-muted py-12">Try one of the actions above or ask a question below.</div>
           )}
 
           {messages.map((m, i) => (
-            <MessageBubble key={i} m={m} isUser={m.from === 'user'} />
-          ))}
-
-          {/* Typing / thinking indicator */}
-          {sending && (
-            <div className="flex items-center gap-3">
-              <div className="ml-11">
-                <div className="px-3 py-2 bg-slate-800/60 text-slate-200 rounded-lg inline-block">
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
-                    <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse delay-75" />
-                    <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse delay-150" />
-                  </div>
-                </div>
-              </div>
+            <div key={i} className={`max-w-[85%] px-3 py-2 rounded-lg ${m.from === 'user' ? 'ml-auto' : (m.from === 'bot' ? 'mr-auto' : 'mx-auto')}`} style={{background: m.from === 'user' ? 'var(--accent)' : m.from === 'bot' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.02)', color: m.from === 'user' ? 'var(--text-on-accent)' : 'var(--text-primary)'}}>
+              <div className="text-sm whitespace-pre-wrap">{m.text}</div>
+              {m.createdAt && <div className="text-[10px] text-muted mt-1">{new Date(m.createdAt).toLocaleTimeString()}</div>}
             </div>
-          )}
+          ))}
         </div>
 
-        {/* Input bar */}
+        {/* Input area */}
         <div className="mt-4 flex items-center gap-3">
-          <button className="p-2 rounded-md bg-slate-700/10" title="Attach file" onClick={()=>fileRef.current && fileRef.current.click()}>
-            📎
-            <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
-          </button>
-
-          <textarea
+          <input
             value={input}
             onChange={e=>setInput(e.target.value)}
             onKeyDown={e=>{ if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-            placeholder="Ask about a stock, upload a report, or try a quick action..."
-            className="input flex-1 h-10 resize-none"
+            placeholder="Ask about a stock or financial report..."
+            className="input flex-1"
             aria-label="chat-input"
+            rows={1}
           />
 
           <div className="flex items-center gap-2">
-            <button onClick={() => send()} disabled={sending || !mounted} className="btn-cta px-4 py-2">{sending ? 'Thinking…' : 'Send'}</button>
-            <button onClick={exportChat} className="cta-ghost px-3 py-2">Export</button>
+            <label className="inline-flex items-center px-3 py-2 rounded-md bg-slate-700/20 cursor-pointer text-sm" title="Upload PDF/CSV">
+              <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
+              Upload
+            </label>
+            <button onClick={() => send()} disabled={sending} className="btn-cta px-4 py-2">{sending ? 'Thinking…' : 'Send'}</button>
+            <button onClick={exportChat} className="cta-ghost px-4 py-2">Export Chat</button>
           </div>
         </div>
 
-        {/* Attachment preview */}
-        {uploadName && (
-          <div className="mt-3 p-3 rounded-md bg-slate-800/40 border border-slate-700 text-sm text-slate-200 flex items-center justify-between">
-            <div>{uploadName}</div>
-            <div className="text-xs text-slate-400">Preview available</div>
-          </div>
-        )}
-
         {/* Optional small preview area for uploaded content */}
         {historyPreview && (
-          <div className="mt-3 p-3 rounded-md bg-black/5 text-sm text-slate-300">{historyPreview}</div>
+          <div className="mt-3 p-3 rounded-md bg-black/5 text-sm text-muted">{historyPreview}</div>
         )}
       </div>
     </div>
