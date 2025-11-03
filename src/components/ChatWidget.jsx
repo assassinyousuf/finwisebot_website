@@ -8,6 +8,7 @@ export default function ChatWidget() {
   const [sending, setSending] = useState(false)
   const [uploadName, setUploadName] = useState(null)
   const [historyPreview, setHistoryPreview] = useState(null)
+  const [iconOk, setIconOk] = useState(true)
   const fileRef = useRef(null)
   const scrollRef = useRef(null)
   const [showActions, setShowActions] = useState(false)
@@ -124,7 +125,19 @@ export default function ChatWidget() {
       <div className="glass rounded-2xl p-4 shadow-xl relative" style={{minHeight: 360}}>
         {/* Compact header with actions popover */}
         <div className="flex items-center justify-between mb-4">
-          <div className="text-sm font-semibold text-white">PeekoChat</div>
+          <div className="flex items-center gap-3">
+            {iconOk ? (
+              <img
+                src="/peekochat.svg"
+                alt="PeekoChat"
+                onError={(e) => { setIconOk(false); e.currentTarget.style.display = 'none' }}
+                className="w-8 h-8 rounded"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded bg-emerald-500 flex items-center justify-center text-black font-bold">P</div>
+            )}
+            <div className="text-sm font-semibold text-white">PeekoChat</div>
+          </div>
           <div className="relative">
             <button onClick={() => setShowActions(s => !s)} aria-expanded={showActions} className="px-3 py-1 rounded-md badge-soft">Actions ▾</button>
             {showActions && (
