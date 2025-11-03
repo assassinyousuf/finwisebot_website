@@ -134,31 +134,26 @@ export default function ChatWidget() {
     <div className="w-full max-w-3xl mx-auto p-3">
       <div className="glass rounded-2xl p-4 shadow-xl relative" style={{minHeight: 420}}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <div className="text-sm font-semibold text-white">PeekoChat</div>
             <div className="text-xs text-slate-400">AI financial assistant</div>
           </div>
-          <div className="relative">
-            <button onClick={() => setShowActions(s => !s)} aria-expanded={showActions} className="px-3 py-1 rounded-md badge-soft">Quick ▾</button>
-            {showActions && (
-              <div className="absolute right-0 mt-2 w-64 bg-slate-900/90 border border-slate-700 rounded-lg p-3 shadow-lg z-40">
-                <div className="flex flex-col gap-2">
-                  <button onClick={() => { quickAction('Summarize Apple 10-Q'); setShowActions(false) }} className="text-left badge-soft">Summarize Apple 10-Q</button>
-                  <button onClick={() => { quickAction('Generate signal for NVDA'); setShowActions(false) }} className="text-left badge-soft">Generate signal for NVDA</button>
-                  <button onClick={() => { quickAction('Backtest strategy X'); setShowActions(false) }} className="text-left badge-soft">Backtest strategy X</button>
-                  <label className="cursor-pointer badge-soft text-left" onClick={() => setShowActions(false)}>
-                    Upload PDF/CSV
-                    <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
-                  </label>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Messages list */}
-        <div ref={scrollRef} className="flex flex-col gap-3 h-80 overflow-auto p-3" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.02), transparent)'}} role="log" aria-live="polite">
+        {/* Quick action pills (inline) */}
+        <div className="flex items-center gap-2 mb-3">
+          <button onClick={() => quickAction('Summarize Apple 10-Q')} className="px-3 py-2 rounded-md badge-soft text-sm">Summarize Apple 10-Q</button>
+          <button onClick={() => quickAction('Generate signal for NVDA')} className="px-3 py-2 rounded-md badge-soft text-sm">Generate signal for NVDA</button>
+          <button onClick={() => quickAction('Backtest strategy X')} className="px-3 py-2 rounded-md badge-soft text-sm">Backtest strategy X</button>
+          <label className="px-3 py-2 rounded-md badge-soft text-sm cursor-pointer inline-flex items-center">
+            Upload
+            <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
+          </label>
+        </div>
+
+        {/* Messages list (flex-grow) */}
+        <div ref={scrollRef} className="flex-1 flex flex-col gap-3 overflow-auto p-3" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.02), transparent)'}} role="log" aria-live="polite">
           {messages.length === 0 && (
             <div className="text-center text-slate-400 py-10">Try a quick action or ask a question — e.g. "Summarize AAPL's latest earnings"</div>
           )}
