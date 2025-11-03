@@ -37,7 +37,7 @@ export default function Navbar() {
           <Link href="/" className="hover:text-white transition">Home</Link>
           <Link href="/features" className="hover:text-white transition">Features</Link>
           <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
-          <Link href="/demo" className="hover:text-white transition">PeekoChat</Link>
+          <Link href="/peekochat" className="hover:text-white transition">PeekoChat</Link>
           {/* Admin link shown only if user has admin role */}
           {user && user.roles && user.roles.includes('admin') && (
             <Link href="/admin" className="hover:text-white transition">Admin</Link>
@@ -81,7 +81,7 @@ export default function Navbar() {
             <Link href="/">Home</Link>
             <Link href="/features">Features</Link>
             <Link href="/pricing">Pricing</Link>
-            <Link href="/demo">PeekoChat</Link>
+            <Link href="/peekochat">PeekoChat</Link>
             {!user && <Link href="/reports">Reports</Link>}
             <Link href="/settings">Settings</Link>
             {user ? (

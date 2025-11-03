@@ -19,9 +19,9 @@ export default function Hero({ landing = {}, user = null }) {
 
               <div className="flex items-center gap-4 flex-wrap">
                 {user ? (
-                  <a href="/demo" className="cta-primary">Open PeekoChat</a>
+                  <a href="/peekochat" className="cta-primary">Open PeekoChat</a>
                 ) : (
-                  <a href="/demo" className="btn-cta">Try PeekoChat</a>
+                  <a href="/peekochat" className="btn-cta">Try PeekoChat</a>
                 )}
                 <a href="/features" className="cta-ghost">Explore Features</a>
                 <a href="/pricing" className="text-sm text-white/70 px-3 py-2">Pricing</a>
