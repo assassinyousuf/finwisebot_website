@@ -141,8 +141,29 @@ export default function ChatWidget() {
           <div className="flex items-center gap-3">
             {/* icon: use /peekochat.png if available, otherwise fallback to initials avatar */}
             <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-800 flex items-center justify-center">
-              {/* Prefer the SVG you provided directly to avoid a missing-PNG fallback cycle */}
-              <img src="/peekochat.svg" alt="PeekoChat" onError={(e)=>{ e.currentTarget.style.display='none' }} className="w-full h-full object-cover" />
+              {/* Inline SVG to guarantee icon renders without an extra network request */}
+              <svg viewBox="0 0 256 256" width="40" height="40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                  <linearGradient id="g2" x1="0" x2="1">
+                    <stop offset="0%" stopColor="#60E0A6" />
+                    <stop offset="100%" stopColor="#2ABF9F" />
+                  </linearGradient>
+                </defs>
+                <rect width="100%" height="100%" rx="28" fill="#0b1220" />
+                <g transform="translate(20,20) scale(0.8)">
+                  <circle cx="80" cy="48" r="44" fill="#ffd966" stroke="#f6c84c" strokeWidth="3" />
+                  <circle cx="96" cy="44" r="6" fill="#2b2b2b" />
+                  <path d="M56 28 C44 12, 30 8, 34 32 C36 44, 46 36, 56 28" fill="#ffd966" stroke="#f6c84c" strokeWidth="2"/>
+                  <path d="M64 60 L80 56 L74 48 Z" fill="#8b8b8b" />
+                  <rect x="120" y="10" width="80" height="56" rx="8" fill="url(#g2)" />
+                  <circle cx="148" cy="38" r="4" fill="#fff" />
+                  <circle cx="164" cy="38" r="4" fill="#fff" />
+                  <circle cx="180" cy="38" r="4" fill="#fff" />
+                  <rect x="8" y="110" width="18" height="36" rx="3" fill="#2abf9f" />
+                  <rect x="34" y="92" width="18" height="54" rx="3" fill="#60e0a6" />
+                  <rect x="60" y="72" width="18" height="74" rx="3" fill="#2abf9f" />
+                </g>
+              </svg>
             </div>
             <div>
               <div className="text-sm font-semibold text-white">PeekoChat</div>
