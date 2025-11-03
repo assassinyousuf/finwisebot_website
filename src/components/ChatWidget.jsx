@@ -132,7 +132,10 @@ export default function ChatWidget() {
 
   return (
     <div className="w-full max-w-3xl mx-auto p-3">
-      <div className="glass rounded-2xl p-4 shadow-xl relative" style={{minHeight: 420}}>
+      <div className="glass rounded-2xl p-4 shadow-xl relative overflow-hidden" style={{minHeight: 420}}>
+        {/* decorative accent */}
+        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-emerald-500/10 pointer-events-none filter blur-xl" />
+        <div className="absolute left-4 top-4 w-12 h-1 rounded-full bg-emerald-500/30" />
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
@@ -141,39 +144,7 @@ export default function ChatWidget() {
           </div>
         </div>
 
-        {/* Quick action pills (inline on md+, collapsed on small screens) */}
-        <div className="mb-3">
-          {/* pills visible on md+ */}
-          <div className="hidden md:flex items-center gap-3 overflow-x-auto">
-            <button onClick={() => quickAction('Summarize Apple 10-Q')} className="px-4 py-2 rounded-lg badge-soft text-sm hover:scale-[1.02] transition">Summarize Apple 10-Q</button>
-            <button onClick={() => quickAction('Generate signal for NVDA')} className="px-4 py-2 rounded-lg badge-soft text-sm hover:scale-[1.02] transition">Generate signal for NVDA</button>
-            <button onClick={() => quickAction('Backtest strategy X')} className="px-4 py-2 rounded-lg badge-soft text-sm hover:scale-[1.02] transition">Backtest strategy X</button>
-            <button onClick={() => fileRef.current && fileRef.current.click()} aria-label="Upload report" className="px-4 py-2 rounded-lg badge-soft text-sm">Upload</button>
-            <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
-          </div>
-
-          {/* small screens: single quick button opens popover (uses showActions) */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setShowActions(s => !s)}
-              aria-haspopup="menu"
-              aria-expanded={showActions}
-              className="px-3 py-2 rounded-md badge-soft text-sm"
-            >
-              Quick ▾
-            </button>
-            {showActions && (
-              <div role="menu" tabIndex={-1} onKeyDown={(e)=>{ if(e.key==='Escape') setShowActions(false)}} className="ml-2 w-full bg-slate-900/90 border border-slate-700 rounded-lg p-3 shadow-lg z-40">
-                <div className="flex flex-col gap-2">
-                  <button role="menuitem" onClick={() => { quickAction('Summarize Apple 10-Q'); setShowActions(false) }} className="text-left badge-soft">Summarize Apple 10-Q</button>
-                  <button role="menuitem" onClick={() => { quickAction('Generate signal for NVDA'); setShowActions(false) }} className="text-left badge-soft">Generate signal for NVDA</button>
-                  <button role="menuitem" onClick={() => { quickAction('Backtest strategy X'); setShowActions(false) }} className="text-left badge-soft">Backtest strategy X</button>
-                  <button role="menuitem" onClick={() => { fileRef.current && fileRef.current.click(); setShowActions(false) }} className="text-left badge-soft">Upload PDF/CSV</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Quick actions removed as requested (upload is available via paperclip). */}
 
         {/* Messages list (flex-grow) */}
         <div ref={scrollRef} className="flex-1 flex flex-col gap-3 overflow-auto p-3" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.02), transparent)'}} role="log" aria-live="polite">
@@ -181,11 +152,7 @@ export default function ChatWidget() {
             <div className="mx-auto my-6 w-full max-w-lg p-4 rounded-md bg-slate-900/40 border border-slate-700 text-slate-300">
               <div className="text-sm font-semibold text-white mb-2">Welcome to PeekoChat</div>
               <div className="text-sm text-slate-300 mb-3">Try one of these quick actions or ask a question.</div>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => quickAction('Summarize Apple 10-Q')} className="px-3 py-2 rounded-md badge-soft text-sm">Summarize Apple 10-Q</button>
-                <button onClick={() => quickAction('Generate signal for NVDA')} className="px-3 py-2 rounded-md badge-soft text-sm">Generate signal for NVDA</button>
-                <button onClick={() => quickAction('Backtest strategy X')} className="px-3 py-2 rounded-md badge-soft text-sm">Backtest strategy X</button>
-              </div>
+              <div className="text-sm text-slate-300 mb-3">Try commands like: Summarize AAPL 10-Q, Generate signal for NVDA, or Upload a report using the paperclip.</div>
               <div className="text-xs text-slate-400 mt-3">Examples: "Summarize AAPL earnings", "What is the sentiment on NVDA?", "Backtest strategy with moving average crossover"</div>
             </div>
           )}
