@@ -139,9 +139,19 @@ export default function ChatWidget() {
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
-            <div className="text-sm font-semibold text-white">PeekoChat</div>
-            <div className="text-xs text-slate-400">AI financial assistant</div>
+            {/* icon: use /peekochat.png if available, otherwise fallback to initials avatar */}
+            <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-800 flex items-center justify-center">
+              <img src="/peekochat.png" alt="PeekoChat" onError={(e)=>{ e.currentTarget.style.display='none' }} className="w-full h-full object-cover" />
+              <div className="-ml-10">
+                {/* hidden fallback content - Avatar will show if image removed */}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-white">PeekoChat</div>
+              <div className="text-xs text-slate-400">AI financial assistant</div>
+            </div>
           </div>
+          <div className="text-xs text-slate-400">{user ? user.email || user.name : ''}</div>
         </div>
 
         {/* Quick actions removed as requested (upload is available via paperclip). */}
