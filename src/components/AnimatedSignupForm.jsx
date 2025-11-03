@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import mockApi from '../lib/mockApi';
 import { useRouter } from 'next/router'
 import Link from 'next/link';
 
@@ -28,35 +29,20 @@ export default function AnimatedSignupForm() {
 
     setLoading(true);
     try {
-      const resp = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'signup', email, password }),
-      })
-      const data = await resp.json()
-      if (!resp.ok) {
-        setMessage(data.error || 'Signup failed')
+      const data = await mockApi.login({ email })
+      if (!data || !data.ok) {
+        setMessage('Signup failed')
       } else {
-        // For demo we may receive a verifyToken in dev
-        let note = data.message || 'Account created — check your email to verify.'
-        if (data.verifyToken) {
-          note += `\n(DEV token: ${data.verifyToken})`
-          setDevVerifyToken(data.verifyToken)
-        } else {
-          // redirect to homepage after a short pause so user sees confirmation
-          setTimeout(() => router.push('/'), 900)
-        }
-        setMessage(note)
+        setMessage('Account created — signed in (demo)')
         setEmail('')
         setPassword('')
         setConfirm('')
+        setTimeout(() => router.push('/'), 700)
       }
     } catch (err) {
       console.error(err)
       setMessage('Signup failed — please try again later')
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   };
 
   const passwordStrength = () => {
@@ -75,75 +61,73 @@ export default function AnimatedSignupForm() {
         <h2 className="text-3xl text-white font-bold mb-2">Create your account</h2>
         <p className="text-sm text-white/70 mb-6">Join FinWisebot and start smarter backtests</p>
 
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          <label className="text-xs text-white/70">Email</label>
+        <form onSubmit={submit} className="flex flex-col gap-4" aria-label="Signup form">
+          <label className="text-xs text-muted">Email</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@domain.com"
-            className="p-3 rounded-md bg-white/10 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="input"
             required
+            aria-required="true"
           />
 
-          <label className="text-xs text-white/70">Password</label>
+          <label className="text-xs text-muted">Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Choose a strong password"
-            className="p-3 rounded-md bg-white/10 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="input"
             required
+            aria-required="true"
           />
 
-          <label className="text-xs text-white/70">Confirm password</label>
+          <label className="text-xs text-muted">Confirm password</label>
           <input
             type="password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             placeholder="Repeat your password"
-            className="p-3 rounded-md bg-white/10 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="input"
             required
+            aria-required="true"
           />
 
           <button
             type="submit"
-            className="mt-2 bg-accent text-black font-semibold py-2 rounded-md shadow hover:scale-[1.01] transition-transform disabled:opacity-60"
+            className="btn-cta mt-2"
             disabled={loading}
+            aria-busy={loading}
           >
             {loading ? 'Creating…' : 'Create account'}
           </button>
 
-          <div className="text-xs text-white/60 mt-1">Password strength: <span className="font-medium">{passwordStrength()}</span></div>
+          <div className="text-xs text-muted mt-1">Password strength: <span className="font-medium">{passwordStrength()}</span></div>
 
-          <div className="text-sm text-white/70 mt-2">
+          <div className="text-sm text-muted mt-2">
             Already have an account? <Link href="/login" className="text-accent underline">Sign in</Link>
           </div>
 
-          {message && <div className="mt-3 text-sm text-white/80">{message}</div>}
+          {message && <div className="mt-3 text-sm" style={{color:'var(--muted)'}}>{message}</div>}
           {devVerifyToken && (
             <div className="mt-3 bg-white/5 p-3 rounded-md">
-              <div className="text-xs text-white/60 mb-2">Developer verify token (click to verify):</div>
+              <div className="text-xs" style={{color:'var(--muted)'}}>Developer verify token (click to verify):</div>
               <div className="flex items-center gap-2">
-                <input readOnly value={devVerifyToken} className="flex-1 p-2 rounded bg-black/10 text-xs text-white/80" />
+                <input readOnly value={devVerifyToken} className="flex-1 p-2 rounded bg-black/10 text-xs" />
                 <button onClick={async ()=>{
                   setVerifying(true)
                   try {
-                    const resp = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'verify', token: devVerifyToken }), credentials: 'include' })
-                    const j = await resp.json()
-                    if (resp.ok && j.ok) {
-                      setMessage('Email verified — signing in and redirecting...')
-                      setTimeout(()=>router.push('/'), 700)
-                    } else {
-                      setMessage(j.error || 'Verification failed')
-                    }
+                    // in demo mode, verification simply signs the user in
+                    await mockApi.login({ email })
+                    setMessage('Email verified — signing in and redirecting...')
+                    setTimeout(()=>router.push('/'), 700)
                   } catch (e) {
                     console.error('verify click error', e)
                     setMessage('Verification failed — try again')
-                  } finally {
-                    setVerifying(false)
-                  }
-                }} className="bg-accent text-black px-3 py-2 rounded text-sm" disabled={verifying}>{verifying ? 'Verifying…' : 'Verify'}</button>
+                  } finally { setVerifying(false) }
+                }} className="btn-cta" disabled={verifying}>{verifying ? 'Verifying…' : 'Verify'}</button>
               </div>
             </div>
           )}

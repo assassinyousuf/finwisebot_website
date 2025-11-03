@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatBubble from '../components/ChatBubble';
 import ExportButton from '../components/ExportButton';
+import mockApi from '../lib/mockApi';
 
 // Dynamically load heavy visual components client-side to reduce initial bundle size
 const DemoVisualizer = dynamic(() => import('../components/DemoVisualizer'), {
@@ -28,15 +29,9 @@ export default function Demo() {
     setInput("");
     setTyping(true);
 
-    // Call placeholder backend API
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: input })
-    });
-    const data = await response.json();
-  const botMessage = { text: data.answer, type: 'bot', citations: data.citations || [], time: new Date().toLocaleTimeString() };
+    // Use client-side mock chat
+    const data = await mockApi.chat({ query: input })
+  const botMessage = { text: data.chat.answer, type: 'bot', citations: data.chat.citations || [], time: new Date().toLocaleTimeString() };
     // small delay to showcase typing indicator
     setTimeout(() => {
       setMessages(prev => [...prev, botMessage]);

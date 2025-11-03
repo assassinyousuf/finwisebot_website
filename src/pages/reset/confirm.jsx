@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import mockApi from '../../lib/mockApi'
 
 export default function ConfirmReset(){
   const router = useRouter()
@@ -21,14 +22,11 @@ export default function ConfirmReset(){
     if (newPassword !== confirm) { setMessage('Passwords do not match'); return }
     setLoading(true)
     try {
-      const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'reset_password', token, newPassword }) })
-      const j = await res.json()
-      if (!res.ok) throw new Error(j.error || 'Reset failed')
-      setMessage('Password reset — you are now logged in')
+      // frontend-only: simulate reset success
+      await mockApi.login({ email: 'user@local' })
+      setMessage('Password reset — you are now logged in (demo)')
       setTimeout(()=>router.push('/'), 800)
-    } catch (err) {
-      setMessage(err.message)
-    } finally { setLoading(false) }
+    } catch (err) { setMessage(String(err)) } finally { setLoading(false) }
   }
 
   return (

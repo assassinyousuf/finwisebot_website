@@ -1,50 +1,128 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import mockApi from '../lib/mockApi'
 
 export default function ChatWidget() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [uploadName, setUploadName] = useState(null)
+  const [historyPreview, setHistoryPreview] = useState(null)
+  const fileRef = useRef(null)
+  const scrollRef = useRef(null)
 
-  async function send() {
-    if (!input.trim()) return
-    const q = input.trim()
-    setMessages(m => [...m, { from: 'user', text: q }])
-    setInput('')
+  useEffect(() => {
+    // auto-scroll when messages change
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+  }, [messages])
+
+  async function send(query) {
+    const q = (typeof query === 'string') ? query : input.trim()
+    if (!q) return
+    setMessages(m => [...m, { from: 'user', text: q, createdAt: new Date() }])
+    if (!query) setInput('')
     setSending(true)
-    // fake typing indicator
-    setMessages(m => [...m, { from: 'bot', text: '...', thinking: true }])
+    // show thinking
+    setMessages(m => [...m, { from: 'bot', text: 'Thinking…', thinking: true }])
 
     try {
-      const res = await fetch('/api/chat', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q }) })
-      const j = await res.json()
-      // replace thinking message
+      const j = await mockApi.chat({ query: q })
       setMessages(m => {
         const copy = m.slice(0, -1)
-        return [...copy, { from: 'bot', text: j.answer }]
+        return [...copy, { from: 'bot', text: j.chat.answer, createdAt: new Date() }]
       })
     } catch (err) {
       setMessages(m => {
         const copy = m.slice(0, -1)
-        return [...copy, { from: 'bot', text: 'Error: failed to reach the server' }]
+        return [...copy, { from: 'bot', text: 'Error: failed to reach the server', createdAt: new Date() }]
       })
     } finally {
       setSending(false)
     }
   }
 
-  return (
-    <div className="w-full max-w-xl mx-auto p-4 glass rounded-2xl">
-      <div className="flex flex-col gap-3 h-64 overflow-auto p-2" style={{minHeight: 160}}>
-        {messages.map((m, i) => (
-          <div key={i} className={`px-3 py-2 rounded-lg ${m.from === 'user' ? 'self-end bg-accent text-black' : 'self-start bg-white/6 text-white'}`}>
-            <div className="text-sm whitespace-pre-wrap">{m.text}</div>
-          </div>
-        ))}
-      </div>
+  function quickAction(text) {
+    // insert quick sample into input and send
+    setInput(text)
+    // small delay to allow input to update in UI before sending
+    setTimeout(() => send(text), 120)
+  }
 
-      <div className="mt-3 flex items-center gap-2">
-        <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter') send() }} placeholder="Ask FinWisebot a question..." className="flex-1 px-3 py-2 rounded-lg bg-white/5 text-white placeholder-white/60" />
-        <button onClick={send} disabled={sending} className="btn-cta px-4 py-2">{sending ? 'Thinking…' : 'Send'}</button>
+  function onFileChange(e) {
+    const f = e.target.files && e.target.files[0]
+    if (!f) return
+    setUploadName(f.name)
+    // For demo, just store a small preview
+    const reader = new FileReader()
+    reader.onload = () => {
+      const txt = String(reader.result).slice(0, 1000)
+      setHistoryPreview(`Uploaded ${f.name} — preview:\n${txt.slice(0, 400)}`)
+      setMessages(m => [...m, { from: 'system', text: `Uploaded ${f.name}` }])
+    }
+    // try to read as text (graceful fallback)
+    reader.readAsText(f.slice(0, 20000))
+  }
+
+  function exportChat() {
+    const blob = new Blob([messages.map(m => `[${m.from}] ${m.text}`).join('\n\n')], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `finwisebot-chat-${Date.now()}.txt`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  return (
+    <div className="w-full max-w-4xl mx-auto p-4">
+      <div className="glass rounded-2xl p-4 shadow-xl" style={{minHeight: 360}}>
+        {/* Top action pills */}
+        <div className="flex gap-3 mb-4 flex-wrap">
+          <button onClick={() => quickAction('Summarize Apple 10-Q')} className="badge-soft">Summarize Apple 10-Q</button>
+          <button onClick={() => quickAction('Generate signal for NVDA')} className="badge-soft">Generate signal for NVDA</button>
+          <button onClick={() => quickAction('Backtest strategy X')} className="badge-soft">Backtest strategy X</button>
+          <label className="badge-soft cursor-pointer">
+            Upload PDF/CSV
+            <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
+          </label>
+          {uploadName && <div className="text-xs text-muted px-2">{uploadName}</div>}
+        </div>
+
+        {/* Chat area */}
+        <div ref={scrollRef} className="flex flex-col gap-3 h-72 overflow-auto p-3" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.02), transparent)'}}>
+          {messages.length === 0 && (
+            <div className="text-center text-muted py-12">Try one of the actions above or ask a question below.</div>
+          )}
+
+          {messages.map((m, i) => (
+            <div key={i} className={`max-w-[85%] px-3 py-2 rounded-lg ${m.from === 'user' ? 'ml-auto' : (m.from === 'bot' ? 'mr-auto' : 'mx-auto')}`} style={{background: m.from === 'user' ? 'var(--accent)' : m.from === 'bot' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.02)', color: m.from === 'user' ? 'var(--text-on-accent)' : 'var(--text-primary)'}}>
+              <div className="text-sm whitespace-pre-wrap">{m.text}</div>
+              {m.createdAt && <div className="text-[10px] text-muted mt-1">{new Date(m.createdAt).toLocaleTimeString()}</div>}
+            </div>
+          ))}
+        </div>
+
+        {/* Input area */}
+        <div className="mt-4 flex items-center gap-3">
+          <input
+            value={input}
+            onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=>{ if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
+            placeholder="Ask about a stock or financial report..."
+            className="input flex-1"
+            aria-label="chat-input"
+            rows={1}
+          />
+
+          <button onClick={() => send()} disabled={sending} className="btn-cta px-4 py-2">{sending ? 'Thinking…' : 'Send'}</button>
+          <button onClick={exportChat} className="cta-ghost px-4 py-2">Export Chat</button>
+        </div>
+
+        {/* Optional small preview area for uploaded content */}
+        {historyPreview && (
+          <div className="mt-3 p-3 rounded-md bg-black/5 text-sm text-muted">{historyPreview}</div>
+        )}
       </div>
     </div>
   )

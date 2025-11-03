@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import mockApi from '../../lib/mockApi'
 
 export default function AdminPage() {
   const [me, setMe] = useState(null)
@@ -17,41 +18,17 @@ export default function AdminPage() {
     async function load() {
       setLoading(true)
       try {
-        const meRes = await fetch('/api/me', { credentials: 'include' })
-        if (meRes.ok) {
-          const meJson = await meRes.json()
-          if (!meJson.ok) throw new Error(meJson.error || 'No user')
-          setMe(meJson.user)
-        } else {
-          // If running in development, allow unsecured admin panel even if /api/me fails
-          if (process.env.NEXT_PUBLIC_UNSAFE_ADMIN === 'true' || process.env.NODE_ENV !== 'production') {
-            setMe({ roles: ['admin'] })
-          } else {
-            throw new Error('Not authorized')
-          }
-        }
+        // client-side mock auth
+        const me = await mockApi.getMe()
+        if (me && me.ok) setMe(me.user)
+        else if (process.env.NEXT_PUBLIC_UNSAFE_ADMIN === 'true' || process.env.NODE_ENV !== 'production') setMe({ roles: ['admin'] })
 
-        // load users and chats
-        const [uRes, cRes, sRes] = await Promise.all([
-          fetch('/api/admin/users', { credentials: 'include' }),
-          fetch('/api/admin/chats', { credentials: 'include' }),
-          fetch('/api/admin/settings?key=chat_api_key', { credentials: 'include' }),
-        ])
-        if (!uRes.ok) throw new Error('Failed to load users')
-        if (!cRes.ok) throw new Error('Failed to load chats')
-        const uJson = await uRes.json()
-        const cJson = await cRes.json()
-        const sJson = await sRes.json()
-        setUsers(uJson.users || [])
-        setChats(cJson.chats || [])
-        setSettings(sJson || {})
-        // fetch DB status
-        try {
-          const ds = await (await fetch('/api/admin/db-status', { credentials: 'include' })).json()
-          setDbStatus(ds)
-        } catch (e) {
-          console.warn('failed to fetch db status', e)
-        }
+        const [uJ, cJ, sJ] = await Promise.all([mockApi.getUsers(), mockApi.getChats(), mockApi.getSettings('chat_api_key')])
+        setUsers((uJ && uJ.users) || [])
+        setChats((cJ && cJ.chats) || [])
+        setSettings({ value: (sJ && sJ.value) || '' })
+        // dbStatus is not applicable in frontend-only mode
+        setDbStatus({ ok: false, error: 'local demo (no DB)' })
       } catch (err) {
         console.error('admin load error', err)
         setError(err.message)
@@ -65,39 +42,37 @@ export default function AdminPage() {
   if (!me || !me.roles || !me.roles.includes('admin')) return <div className="p-8">Access denied — admin only.</div>
 
   async function promote(id) {
-  const res = await fetch('/api/admin/users', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ id, action: 'promote' }) })
-    if (res.ok) { const j = await res.json(); setUsers(users.map(u => u._id === id ? j.user : u)) }
+  const res = await mockApi.promoteUser(id)
+    if (res && res.ok) setUsers(users.map(u => (u._id === id || u.id === id) ? res.user : u))
   }
 
   async function demote(id) {
-  const res = await fetch('/api/admin/users', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ id, action: 'demote' }) })
-    if (res.ok) { const j = await res.json(); setUsers(users.map(u => u._id === id ? j.user : u)) }
+  const res = await mockApi.demoteUser(id)
+    if (res && res.ok) setUsers(users.map(u => (u._id === id || u.id === id) ? res.user : u))
   }
 
   async function deleteUser(id) {
     if (!confirm('Delete user?')) return
-  const res = await fetch('/api/admin/users?id=' + encodeURIComponent(id), { method: 'DELETE', credentials: 'include' })
-    if (res.ok) setUsers(users.filter(u => u._id !== id))
+  const res = await mockApi.deleteUser(id)
+    if (res && res.ok) setUsers(users.filter(u => (u._id !== id && u.id !== id)))
   }
 
   async function deleteChat(id) {
     if (!confirm('Delete chat?')) return
-  const res = await fetch('/api/admin/chats?id=' + encodeURIComponent(id), { method: 'DELETE', credentials: 'include' })
-    if (res.ok) setChats(chats.filter(c => c._id !== id))
+  const res = await mockApi.deleteChat(id)
+    if (res && res.ok) setChats(chats.filter(c => c._id !== id))
   }
 
   async function saveApiKey() {
     if (!confirm('Save new API key?')) return
     setSaving(true)
     try {
-    const res = await fetch('/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ key: 'chat_api_key', value: apiKeyEdit }) })
-      if (!res.ok) throw new Error('Failed to save')
-      const j = await res.json()
-      // reload settings
-  const s = await (await fetch('/api/admin/settings?key=chat_api_key', { credentials: 'include' })).json()
-      setSettings(s)
+    const res = await mockApi.setSetting('chat_api_key', apiKeyEdit)
+      if (!res || !res.ok) throw new Error('Failed to save')
+      const s = await mockApi.getSettings('chat_api_key')
+      setSettings({ value: s.value })
       setApiKeyEdit('')
-      alert('Saved')
+      alert('Saved (local)')
     } catch (err) {
       console.error(err)
       alert('Failed to save key: ' + err.message)
@@ -109,11 +84,11 @@ export default function AdminPage() {
     setSaTestLoading(true)
     setSaTestResult(null)
     try {
-      const res = await fetch('/api/admin/test-service-account', { credentials: 'include' })
-      const j = await res.json()
+      // local demo: just echo stored settings
+      const s = await mockApi.getSettings('chat_api_key')
+      const j = { ok: true, body: s }
       setSaTestResult(j)
-      if (j.ok) alert('Service account test OK')
-      else alert('Service account test failed: ' + (j.error || j.body || j.status))
+      alert('Service account test (local): ' + (s.value ? 'key present' : 'no key'))
     } catch (err) {
       console.error('test service account error', err)
       setSaTestResult({ ok: false, error: String(err) })
@@ -125,7 +100,7 @@ export default function AdminPage() {
     <div className="p-8 space-y-6">
       <h1 className="text-2xl font-bold">Admin Dashboard</h1>
       <section>
-        <h2 className="text-xl font-semibold">Users ({users.length})</h2>
+            <h2 className="text-xl font-semibold">Users ({users.length})</h2>
         <div className="mt-2 space-y-2">
           {users.map(u => (
             <div key={u._id} className="p-3 border rounded flex items-center justify-between">
@@ -135,19 +110,18 @@ export default function AdminPage() {
               </div>
               <div className="space-x-2">
                 {(u.roles||[]).includes('admin') ? (
-                  <button onClick={() => demote(u._id)} className="px-3 py-1 bg-yellow-500 text-white rounded">Demote</button>
+                  <button onClick={() => demote(u._id || u.id)} className="px-3 py-1 bg-yellow-500 text-white rounded">Demote</button>
                 ) : (
-                  <button onClick={() => promote(u._id)} className="px-3 py-1 bg-green-600 text-white rounded">Promote</button>
+                  <button onClick={() => promote(u._id || u.id)} className="px-3 py-1 bg-green-600 text-white rounded">Promote</button>
                 )}
-                <button onClick={() => deleteUser(u._id)} className="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
+                <button onClick={() => deleteUser(u._id || u.id)} className="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
                 <button onClick={async ()=>{
                   const pwd = prompt('Enter new password for ' + (u.email||u._id) + ' (min 8 chars)')
                   if (!pwd) return
                   if (pwd.length < 8) { alert('Password too short'); return }
                   try {
-                    const res = await fetch('/api/admin/users', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ id: u._id, action: 'resetPassword', newPassword: pwd }) })
-                    if (!res.ok) throw new Error('Reset failed')
-                    alert('Password reset successfully')
+                    // local demo: no-op
+                    alert('Password reset simulated (frontend-only)')
                   } catch (e) { console.error(e); alert('Failed to reset password: ' + e.message) }
                 }} className="px-3 py-1 bg-blue-600 text-white rounded">Reset password</button>
               </div>
@@ -173,12 +147,12 @@ export default function AdminPage() {
 
       <section>
         <h2 className="text-xl font-semibold">Chat API Key</h2>
-        <div className="mt-2">
+          <div className="mt-2">
           <div className="mb-2 text-sm text-gray-600">Current key: <span className="font-mono">{settings.value || '— not set —'}</span></div>
           <div className="flex items-center space-x-2">
             <input value={apiKeyEdit} onChange={e => setApiKeyEdit(e.target.value)} placeholder="Paste new API key here" className="px-3 py-2 border rounded w-96 font-mono" />
             <button onClick={saveApiKey} disabled={saving} className="px-3 py-2 bg-blue-600 text-white rounded">{saving ? 'Saving…' : 'Save'}</button>
-            <button onClick={async () => { if (!confirm('Clear stored key?')) return; await fetch('/api/admin/settings?key=chat_api_key', { method: 'DELETE', credentials: 'include' }); setSettings({}); alert('Cleared') }} className="px-3 py-2 bg-red-600 text-white rounded">Clear</button>
+            <button onClick={async () => { if (!confirm('Clear stored key?')) return; await mockApi.deleteSetting('chat_api_key'); setSettings({}); alert('Cleared (local)') }} className="px-3 py-2 bg-red-600 text-white rounded">Clear</button>
             {process.env.NODE_ENV !== 'production' && (
               <button onClick={testServiceAccount} disabled={saTestLoading} className="px-3 py-2 bg-indigo-600 text-white rounded">{saTestLoading ? 'Testing…' : 'Test Service Account'}</button>
             )}
@@ -189,7 +163,7 @@ export default function AdminPage() {
               <pre className="mt-1 p-2 bg-gray-100 rounded text-xs overflow-auto">{JSON.stringify(saTestResult, null, 2)}</pre>
             </div>
           )}
-          <div className="mt-2 text-xs text-gray-500">The key will be stored encrypted (if server configured with <code>SETTINGS_ENCRYPTION_KEY</code>), otherwise stored plaintext with a server warning. This key will be used by the server-side chat provider when configured.</div>
+          <div className="mt-2 text-xs text-gray-500">This admin panel is running in frontend-only demo mode — actions are simulated locally in your browser.</div>
         </div>
       </section>
 

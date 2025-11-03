@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
+import mockApi from '../../lib/mockApi'
 
 export default function RequestReset() {
   const [email, setEmail] = useState('')
@@ -12,16 +13,11 @@ export default function RequestReset() {
     setLoading(true)
     setMessage('')
     try {
-      const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'request_reset', email }) })
-      const j = await res.json()
-      if (!res.ok) throw new Error(j.error || 'Request failed')
-      let note = j.message || 'If an account exists, a reset email has been sent.'
-      if (j.resetToken) note += `\n(DEV token: ${j.resetToken})`
-      setMessage(note)
+      // frontend-only: simulate reset by notifying user
+      await mockApi.getUsers()
+      setMessage('If an account exists, a reset email would be sent (demo).')
       setEmail('')
-    } catch (err) {
-      setMessage(err.message)
-    } finally { setLoading(false) }
+    } catch (err) { setMessage(String(err)) } finally { setLoading(false) }
   }
 
   return (

@@ -8,14 +8,14 @@ export default function Hero({ landing = {}, user = null }) {
   const title = landing?.hero?.title || 'FinWisebot'
   const subtitle = landing?.hero?.subtitle || 'AI analysis, backtesting and cited research — all in one place.'
   return (
-    <header className="hero-bg text-white min-h-screen flex flex-col justify-center items-center text-center p-6 relative overflow-hidden">
+  <header className="hero-bg text-white min-h-[80vh] flex flex-col justify-center items-center text-center p-6 relative overflow-hidden">
       <AmbientOrbs />
       <div className="container max-w-6xl w-full relative z-40">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="px-4">
-            <div className="hero-card bg-white/5 backdrop-blur-md border border-white/6 rounded-3xl px-8 py-10 shadow-xl max-w-xl float-up relative overflow-hidden entrance">
+            <div className="hero-card" style={{background:'var(--panel)', backdropFilter:'blur(8px)'}}>
               <h1 className="hero-title font-heading mb-4 gradient-text">{title}</h1>
-              <p className="hero-subtitle text-lg mb-6">{subtitle}</p>
+              <p className="hero-subtitle text-lg mb-6" style={{color:'var(--muted)'}}>{subtitle}</p>
 
               <div className="flex items-center gap-4 flex-wrap">
                 {user ? (

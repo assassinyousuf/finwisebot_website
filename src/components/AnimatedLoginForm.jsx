@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import mockApi from '../lib/mockApi';
 import Link from 'next/link';
 import { useRouter } from 'next/router'
 
@@ -15,15 +16,9 @@ export default function AnimatedLoginForm() {
     setLoading(true);
     setMessage('');
     try {
-      const resp = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'login', email, password }),
-        credentials: 'include'
-      })
-      const data = await resp.json()
-      if (!resp.ok) {
-        setMessage(data.error || 'Login failed')
+      const data = await mockApi.login({ email })
+      if (!data || !data.ok) {
+        setMessage('Login failed')
       } else {
         setMessage('Login succeeded')
         // redirect to main page
@@ -47,40 +42,43 @@ export default function AnimatedLoginForm() {
         <h2 className="text-3xl text-white font-bold mb-2">Welcome back</h2>
         <p className="text-sm text-white/70 mb-6">Log in to access your FinWisebot dashboard</p>
 
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          <label className="text-xs text-white/70">Email</label>
+        <form onSubmit={submit} className="flex flex-col gap-4" aria-label="Login form">
+          <label className="text-xs text-muted">Email</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@domain.com"
-            className="p-3 rounded-md bg-white/10 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="input"
             required
+            aria-required="true"
           />
 
-          <label className="text-xs text-white/70">Password</label>
+          <label className="text-xs text-muted">Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="p-3 rounded-md bg-white/10 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="input"
             required
+            aria-required="true"
           />
 
           <button
             type="submit"
-            className="mt-2 bg-accent text-black font-semibold py-2 rounded-md shadow hover:scale-[1.01] transition-transform disabled:opacity-60"
+            className="btn-cta mt-2"
             disabled={loading}
+            aria-busy={loading}
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
 
-          <div className="text-sm text-white/70 mt-2">
+          <div className="text-sm text-muted mt-2">
             Don’t have an account? <Link href="/signup" className="text-accent underline">Sign up</Link>
           </div>
 
-          {message && <div className="mt-3 text-sm text-white/80">{message}</div>}
+          {message && <div className="mt-3 text-sm" style={{color:'var(--muted)'}}>{message}</div>}
         </form>
       </div>
     </div>

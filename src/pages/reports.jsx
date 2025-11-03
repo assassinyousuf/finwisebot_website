@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import mockApi from '../lib/mockApi'
 import Link from 'next/link'
 
 function miniBar({ value = 0, max = 1 }){
@@ -19,24 +20,12 @@ export default function ReportsPage(){
     let mounted = true
     async function load(){
       try {
-        // require auth: verify /api/me before loading admin endpoints
-        const me = await fetch('/api/me', { credentials: 'include' })
-        if (!me.ok) { window.location.href = '/login'; return }
-        const mj = await me.json()
-        if (!mj || !mj.ok) { window.location.href = '/login'; return }
-
-        const [cRes, uRes] = await Promise.all([
-          fetch('/api/admin/chats', { credentials: 'include' }),
-          fetch('/api/admin/users', { credentials: 'include' })
-        ])
-        if (cRes.ok) {
-          const j = await cRes.json()
-          if (mounted && j.ok) setChats(j.chats || [])
-        }
-        if (uRes.ok) {
-          const j = await uRes.json()
-          if (mounted && j.ok) setUsers(j.users || [])
-        }
+        // frontend-only mock auth
+        const me = await mockApi.getMe()
+        if (!me || !me.ok) { window.location.href = '/login'; return }
+        const [cJ, uJ] = await Promise.all([mockApi.getChats(), mockApi.getUsers()])
+        if (cJ && cJ.ok && mounted) setChats(cJ.chats || [])
+        if (uJ && uJ.ok && mounted) setUsers(uJ.users || [])
       } catch (e) {
         console.warn('reports load', e)
       } finally { if (mounted) setLoading(false) }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import mockApi from '../lib/mockApi'
 import Link from 'next/link'
 
 export default function SettingsPage() {
@@ -12,26 +13,11 @@ export default function SettingsPage() {
     let mounted = true
     async function load(){
       try {
-        const [uRes, sRes] = await Promise.all([
-          fetch('/api/me', { credentials: 'include' }),
-          fetch('/api/admin/settings?key=chat_api_key', { credentials: 'include' })
-        ])
-        // require auth: redirect to login if not authenticated
-        if (!uRes.ok) {
-          window.location.href = '/login'
-          return
-        }
-        const j = await uRes.json()
-        if (!j || !j.ok) { window.location.href = '/login'; return }
-        if (mounted) setUser(j.user)
-        
-        if (sRes.ok) {
-          const sj = await sRes.json()
-          if (sj && sj.ok) setApiKeyMasked(sj.value || null)
-        }
-      } catch (e) {
-        console.warn('settings load', e)
-      } finally { if (mounted) setLoading(false) }
+        const [uJ, sJ] = await Promise.all([mockApi.getMe(), mockApi.getSettings('chat_api_key')])
+        if (!uJ || !uJ.ok) { window.location.href = '/login'; return }
+        if (mounted) setUser(uJ.user)
+        if (sJ && sJ.ok) setApiKeyMasked(sJ.value || null)
+      } catch (e) { console.warn('settings load', e) } finally { if (mounted) setLoading(false) }
     }
     load()
     return ()=>{ mounted = false }
@@ -42,23 +28,20 @@ export default function SettingsPage() {
     if (!confirm('Save this API key?')) return
     setSaving(true)
     try {
-      const res = await fetch('/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ key: 'chat_api_key', value: editing }) })
-      const j = await res.json()
-      if (!res.ok) throw new Error(j.error || 'Failed')
-      alert('Saved. Key validated and stored encrypted.')
-      const s = await (await fetch('/api/admin/settings?key=chat_api_key', { credentials: 'include' })).json()
+      const res = await mockApi.setSetting('chat_api_key', editing)
+      if (!res || !res.ok) throw new Error('Failed')
+      alert('Saved (local demo)')
+      const s = await mockApi.getSettings('chat_api_key')
       setApiKeyMasked(s.value || null)
       setEditing('')
-    } catch (e) {
-      alert('Failed to save key: ' + (e.message||e))
-    } finally { setSaving(false) }
+    } catch (e) { alert('Failed to save key: ' + (e.message||e)) } finally { setSaving(false) }
   }
 
   async function clearKey(){
     if (!confirm('Clear stored key?')) return
-    await fetch('/api/admin/settings?key=chat_api_key', { method: 'DELETE', credentials: 'include' })
+    await mockApi.deleteSetting('chat_api_key')
     setApiKeyMasked(null)
-    alert('Cleared')
+    alert('Cleared (local)')
   }
 
   return (
@@ -109,7 +92,7 @@ export default function SettingsPage() {
         <div className="card">
           <h2 className="text-lg font-semibold">Quick actions</h2>
           <div className="mt-3 space-y-2">
-            <button className="px-3 py-2 bg-yellow-500 text-black rounded" onClick={async()=>{ if(confirm('Sign out?')) { await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ action: 'logout' }) }); window.location.href='/' } }}>Sign out</button>
+            <button className="px-3 py-2 bg-yellow-500 text-black rounded" onClick={async()=>{ if(confirm('Sign out?')) { await mockApi.logout(); window.location.href='/' } }}>Sign out</button>
             <button className="px-3 py-2 bg-blue-600 text-white rounded" onClick={async()=>{ alert('Run diagnostics from admin panel (dev only)') }}>Run diagnostics</button>
           </div>
         </div>

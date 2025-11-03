@@ -5,9 +5,9 @@ import FeatureCard from '../components/FeatureCard';
 import dynamic from 'next/dynamic';
 import HeroShowcase from '../components/HeroShowcase';
 import ChatWidget from '../components/ChatWidget';
-import Hero from '../components/Hero';
+const PredictionWidget = dynamic(() => import('../components/PredictionWidget'), { ssr: false })
 import { useEffect, useState } from 'react'
-import dynamic from 'next/dynamic'
+import mockApi from '../lib/mockApi'
 
 const Testimonials = dynamic(() => import('../components/Testimonials'), { ssr: false })
 
@@ -20,17 +20,13 @@ export default function Home() {
 
   useEffect(()=>{
     let mounted = true
-    fetch('/api/landing').then(r=>r.json()).then(j=>{
-      if (mounted && j && j.ok) setLanding(j.data)
-    }).catch(()=>{})
+    mockApi.getLanding().then(j=>{ if (mounted && j && j.ok) setLanding(j.data) }).catch(()=>{})
     // fetch basic auth state to adjust CTA
-    fetch('/api/me', { credentials: 'include' }).then(r=>r.json()).then(j=>{
-      if (mounted && j && j.ok) setUser(j.user)
-    }).catch(()=>{})
+    mockApi.getMe().then(j=>{ if (mounted && j && j.ok) setUser(j.user) }).catch(()=>{})
     return ()=>{ mounted = false }
   }, [])
   return (
-    <div>
+    <div className="min-h-screen">
       <Head>
         <title>FinWisebot — AI financial analyst</title>
         <meta name="description" content="FinWisebot: AI-powered summaries, backtesting and cited research for smarter markets." />
@@ -46,51 +42,69 @@ export default function Home() {
 
       <Navbar />
 
-      <Hero landing={landing} user={user} />
+      {/* Clean bold hero */}
+      <main className="container mx-auto px-6 pt-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            {/* Left: Bold headline & CTA */}
+            <div className="py-12">
+              <p className="inline-block px-3 py-1 rounded-full text-sm font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-700">Live Demo</p>
+              <h1 className="mt-6 text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white">FinWisebot — AI research & strategy insights for traders</h1>
+              <p className="mt-6 text-lg text-slate-300 max-w-2xl">Instantly summarize filings, test strategies, and generate confidence-scored predictions — all in a lightweight frontend demo you can point at your own backend later.</p>
 
-      {/* Small showcase panel (kept visually next to hero on large screens) */}
-      <div className="container mt-[-4rem] mb-8">
-        <div className="flex justify-center">
-          <div className="w-full max-w-3xl">
-            <div className="bg-gradient-to-br from-slate-800/60 to-black/30 rounded-2xl p-4 shadow-2xl glass">
-              <HeroShowcase />
-              <div className="mt-4">
-                <ChatWidget />
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a className="inline-flex items-center px-5 py-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold shadow-md" href="#try-demo">Try demo</a>
+                <a className="inline-flex items-center px-5 py-3 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-800" href="#features">Features</a>
+              </div>
+
+              <div className="mt-10 grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/40 rounded-xl p-4">
+                  <div className="text-sm text-slate-300">Return</div>
+                  <div className="mt-2 text-xl font-semibold">+12.4%</div>
+                </div>
+                <div className="bg-slate-800/40 rounded-xl p-4">
+                  <div className="text-sm text-slate-300">Win Rate</div>
+                  <div className="mt-2 text-xl font-semibold">68%</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Demo card (chat + prediction) */}
+            <div id="try-demo" className="py-6">
+              <div className="bg-gradient-to-br from-slate-800/70 to-black/40 rounded-2xl p-6 shadow-2xl border border-slate-700">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">Interactive demo</h3>
+                    <p className="text-sm text-slate-400">Chat with the demo assistant or run a quick synthetic prediction.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <ChatWidget compact />
+                  </div>
+                  <div className="pt-2">
+                    <PredictionWidget />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Feature grid */}
+          <section id="features" className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <FeatureCard icon="📈" title="Real-Time Insights" description="Summaries, signals and cited insights from filings and news." dark />
+            <FeatureCard icon="💹" title="Signal Engine" description="Actionable trading ideas and confidence scores." dark />
+            <FeatureCard icon="📊" title="Backtesting" description="Validate strategies against historical data." dark />
+            <FeatureCard icon="📝" title="Cited Research" description="Traceable sources for every claim." dark />
+          </section>
+
+          {/* Testimonials (kept as a block for social proof) */}
+          <div className="mt-16">
+            <Testimonials />
+          </div>
         </div>
-      </div>
-
-  <section className="py-20 px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-slate-900">
-        <FeatureCard 
-          icon="📈" 
-          title="Real-Time Insights" 
-          description="Instant summaries and cited insights from filings, news, and social sentiment." 
-          dark
-        />
-        <FeatureCard 
-          icon="💹" 
-          title="Signal Engine" 
-          description="Generate actionable trading ideas driven by sentiment and events." 
-          dark
-        />
-        <FeatureCard 
-          icon="📊" 
-          title="Backtesting" 
-          description="Validate strategies against historical data before risking capital." 
-          dark
-        />
-        <FeatureCard 
-          icon="📝" 
-          title="Cited Research" 
-          description="All claims are linked to reliable sources for full transparency." 
-          dark
-        />
-      </section>
-
-      {/* Testimonials */}
-      <Testimonials />
+      </main>
 
       <Footer />
     </div>

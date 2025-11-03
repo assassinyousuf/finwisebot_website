@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import mockApi from '../lib/mockApi';
+import ThemeToggle from './ThemeToggle'
 
-// Simple client-side auth-aware navbar: fetch /api/me to detect logged-in user
+// Simple client-side auth-aware navbar: uses client mockApi to detect logged-in user
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -11,11 +13,8 @@ export default function Navbar() {
     let mounted = true
     async function load() {
       try {
-        const res = await fetch('/api/me', { credentials: 'include' })
-        if (res.ok) {
-          const j = await res.json()
-          if (j && j.ok && mounted) setUser(j.user)
-        }
+        const j = await mockApi.getMe()
+        if (j && j.ok && mounted) setUser(j.user)
       } catch (e) {
         // ignore
       }
@@ -24,9 +23,9 @@ export default function Navbar() {
     return ()=>{ mounted = false }
   }, [])
   return (
-    <nav className="relative">
-      <div className="max-w-6xl mx-auto px-6 py-4">
-        <div className="glass border border-white/6 rounded-2xl px-4 py-3 flex items-center justify-between shadow-lg glow-accent">
+    <nav className="relative sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto px-4 py-3">
+        <div className="glass border rounded-2xl px-4 py-3 flex items-center justify-between shadow-sm" style={{alignItems:'center'}}>
         <div className="flex items-center gap-4">
           <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-400 flex items-center justify-center">
             <div className="w-7 h-7 rounded-lg bg-black/10 backdrop-blur-sm border border-white/8"></div>
@@ -34,11 +33,15 @@ export default function Navbar() {
           <h1 className="text-white text-lg font-heading neon">FinWisebot</h1>
         </div>
 
-        <div className="hidden md:flex items-center gap-6 text-sm text-white/80">
+        <div className="hidden md:flex items-center gap-6 text-sm" style={{color:'var(--muted)'}}>
           <Link href="/" className="hover:text-white transition">Home</Link>
           <Link href="/features" className="hover:text-white transition">Features</Link>
           <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
           <Link href="/demo" className="hover:text-white transition">Demo</Link>
+          {/* Admin link shown only if user has admin role */}
+          {user && user.roles && user.roles.includes('admin') && (
+            <Link href="/admin" className="hover:text-white transition">Admin</Link>
+          )}
           {user && (
             <>
               <Link href="/reports" className="hover:text-white transition">Reports</Link>
@@ -46,29 +49,27 @@ export default function Navbar() {
             </>
           )}
         </div>
-
         <div className="hidden md:flex items-center gap-3">
             {user ? (
             <>
-              <span className="text-sm text-white/80">{user.email}</span>
+              <span className="text-sm" style={{color:'var(--muted)'}}>{user.email}</span>
               <button onClick={async ()=>{
-                try {
-                  await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logout' }), credentials: 'include' })
-                } catch (e) {}
+                try { await mockApi.logout() } catch(e){}
                 setUser(null)
                 // reload home
                 window.location.href = '/'
-              }} className="text-sm text-white/70 hover:text-white transition">Logout</button>
+              }} className="text-sm hover:underline transition" style={{color:'var(--muted)'}}>Logout</button>
             </>
           ) : (
             <>
-              <Link href="/login" className="text-sm text-white/70 hover:text-white transition">Login</Link>
+              <Link href="/login" className="text-sm hover:underline transition" style={{color:'var(--muted)'}}>Login</Link>
               <Link href="/signup" className="btn-cta">Get started</Link>
             </>
           )}
+          <ThemeToggle />
         </div>
 
-        <button className="md:hidden text-white" aria-label="Toggle menu" onClick={() => setOpen(o => !o)}>
+        <button className="md:hidden" aria-label="Toggle menu" onClick={() => setOpen(o => !o)}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-white"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
         </button>
   </div>
@@ -89,7 +90,7 @@ export default function Navbar() {
               <>
                 <div className="text-sm text-white/80">{user.email}</div>
                 <button onClick={async ()=>{
-                  try { await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logout' }), credentials: 'include' }) } catch(e){}
+                  try { await mockApi.logout() } catch(e){}
                   setUser(null)
                   window.location.href = '/'
                 }} className="text-left text-sm text-white/70">Logout</button>
