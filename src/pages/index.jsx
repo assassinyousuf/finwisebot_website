@@ -33,11 +33,22 @@ function generateSparkline(values = [], w = 80, h = 28) {
 }
 
 function Watchlist() {
-  const [items, setItems] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('fw_watchlist') || '[]') } catch(e){ return [] }
-  })
+  // Avoid accessing localStorage during SSR. Load items on client mount.
+  const [mounted, setMounted] = useState(false)
+  const [items, setItems] = useState([])
 
-  useEffect(()=>{ localStorage.setItem('fw_watchlist', JSON.stringify(items)) }, [items])
+  useEffect(() => {
+    setMounted(true)
+    try {
+      const stored = JSON.parse(localStorage.getItem('fw_watchlist') || '[]')
+      setItems(stored)
+    } catch (e) {
+      setItems([])
+    }
+  }, [])
+
+  // Persist only after mount to avoid SSR/client mismatch
+  useEffect(()=>{ if (mounted) localStorage.setItem('fw_watchlist', JSON.stringify(items)) }, [items, mounted])
 
   function add(symbol){
     if (!symbol) return
@@ -62,8 +73,8 @@ function Watchlist() {
             {items.map(it => (
               <tr key={it.symbol} className="border-t border-slate-700/40">
                 <td className="py-3 font-semibold text-white">{it.symbol}</td>
-                <td className="py-3">${it.price}</td>
-                <td className={`py-3 ${Number(it.change) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{Number(it.change).toFixed(2)}%</td>
+                <td className="py-3">{mounted ? `$${it.price}` : ''}</td>
+                <td className={`py-3 ${Number(it.change) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{mounted ? Number(it.change).toFixed(2) + '%' : ''}</td>
                 <td className="py-3"><button className="text-sm text-slate-400 hover:text-white" onClick={()=>remove(it.symbol)}>Remove</button></td>
               </tr>
             ))}
@@ -105,12 +116,16 @@ function LiveNews(){
     { text: 'NVDA extends rally on AI chip demand', ticker: 'NVDA' },
     { text: 'MSFT sees steady cloud growth in Q3', ticker: 'MSFT' },
   ]
-  // Avoid rendering timestamps during SSR to prevent hydration mismatches.
+
+  // Avoid creating random prices/sparks during SSR. Enrich feed only on client mount.
   const [mounted, setMounted] = useState(false)
-  const [feed, setFeed] = useState(() => samples.map((s,i)=>({ ...s, id: i, time: Date.now() - (i*60000), price: +(100 + Math.random()*900).toFixed(2), change: ((Math.random()*2-1)).toFixed(2), sparkValues: Array.from({length:8}).map(()=>100+Math.random()*40) })))
+  const [feed, setFeed] = useState(() => samples.map((s,i)=>({ ...s, id: i, time: Date.now() - (i*60000) })))
 
   useEffect(() => {
     setMounted(true)
+    // enrich existing items with price/change/spark on client
+    setFeed(f => f.map(x => ({ ...x, price: +(100 + Math.random()*900).toFixed(2), change: ((Math.random()*2-1)).toFixed(2), sparkValues: Array.from({length:8}).map(()=>100+Math.random()*40) })))
+
     const t = setInterval(() => {
       const item = samples[Math.floor(Math.random()*samples.length)]
       const rec = { ...item, id: Date.now(), time: Date.now(), price: +(100 + Math.random()*900).toFixed(2), change: ((Math.random()*2-1)).toFixed(2), sparkValues: Array.from({length:8}).map(()=>100+Math.random()*40) }
@@ -126,7 +141,7 @@ function LiveNews(){
           <div className="flex items-center gap-3">
             <div className="w-16">
               <div className="text-sm font-semibold text-white">{f.ticker}</div>
-              <div className={`text-xs ${Number(f.change) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{Number(f.change) >= 0 ? '+' : ''}{Number(f.change).toFixed(2)}%</div>
+              <div className={`text-xs ${Number(f.change) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{mounted && f.change ? (Number(f.change) >= 0 ? '+' : '') + Number(f.change).toFixed(2) + '%' : ''}</div>
             </div>
             <div className="flex flex-col">
               <div className="text-sm text-slate-200">{f.text}</div>
@@ -134,9 +149,9 @@ function LiveNews(){
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-sm text-white font-semibold">${f.price}</div>
+            <div className="text-sm text-white font-semibold">{mounted && f.price ? `$${f.price}` : ''}</div>
             <div className="w-20">
-              {generateSparkline(f.sparkValues, 80, 28)}
+              {mounted && f.sparkValues ? generateSparkline(f.sparkValues, 80, 28) : <div style={{height:28}} />}
             </div>
             <div className="ml-2 text-xs text-emerald-300 font-semibold">LIVE</div>
           </div>
@@ -155,7 +170,12 @@ function MarketOverview(){
     { name: 'VIX', ticker: '^VIX' },
     { name: 'Gold', ticker: 'GC=F' },
   ]
+  // Compute mock data but avoid rendering dynamic text during SSR to prevent hydration mismatches.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const data = indices.map(i => ({ ...i, price: +(1000 + Math.random()*9000).toFixed(2), change: (Math.random()*2-1).toFixed(2), spark: Array.from({length:12}).map(()=>100+Math.random()*40) }))
+
   return (
     <div className="mt-6 grid grid-cols-2 gap-3">
       {data.map(d => (
@@ -163,9 +183,9 @@ function MarketOverview(){
           <div className="flex items-start justify-between">
             <div>
               <div className="text-xs text-slate-400">{d.name}</div>
-              <div className="text-lg font-semibold text-white">{d.price}</div>
+              <div className="text-lg font-semibold text-white">{mounted ? `$${d.price}` : ''}</div>
             </div>
-            <div className={`text-sm font-semibold ${Number(d.change) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{Number(d.change) >= 0 ? '+' : ''}{Number(d.change).toFixed(2)}%</div>
+            <div className={`text-sm font-semibold ${Number(d.change) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{mounted ? (Number(d.change) >= 0 ? '+' : '') + Number(d.change).toFixed(2) + '%' : ''}</div>
           </div>
           <div className="mt-2">
             {generateSparkline(d.spark, 180, 40)}
@@ -178,16 +198,25 @@ function MarketOverview(){
 
 function Trending(){
   const tickers = ['AAPL','TSLA','NVDA','MSFT','AMZN']
+  // Avoid rendering random numbers during SSR
+  const [mounted, setMounted] = useState(false)
+  const [vals, setVals] = useState(() => tickers.map(t => ({ symbol: t })))
+
+  useEffect(() => {
+    setMounted(true)
+    setVals(tickers.map(t => ({ symbol: t, price: (100+Math.random()*900).toFixed(2), spark: Array.from({length:8}).map(()=>100+Math.random()*40) })))
+  }, [])
+
   return (
     <div className="space-y-3">
-      {tickers.map(t => (
-        <div key={t} className="flex items-center justify-between">
+      {vals.map(v => (
+        <div key={v.symbol} className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="font-semibold text-white">{t}</div>
-            <div className="text-xs text-slate-400">${(100+Math.random()*900).toFixed(2)}</div>
+            <div className="font-semibold text-white">{v.symbol}</div>
+            <div className="text-xs text-slate-400">{mounted && v.price ? `$${v.price}` : ''}</div>
           </div>
           <div>
-            {generateSparkline(Array.from({length:8}).map(()=>100+Math.random()*40))}
+            {mounted && v.spark ? generateSparkline(v.spark) : <div style={{height:28}} />}
           </div>
         </div>
       ))}
