@@ -10,6 +10,7 @@ export default function ChatWidget() {
   const [historyPreview, setHistoryPreview] = useState(null)
   const fileRef = useRef(null)
   const scrollRef = useRef(null)
+  const [showActions, setShowActions] = useState(false)
 
   useEffect(() => {
     // auto-scroll when messages change
@@ -107,17 +108,26 @@ export default function ChatWidget() {
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
-      <div className="glass rounded-2xl p-4 shadow-xl" style={{minHeight: 360}}>
-        {/* Top action pills */}
-        <div className="flex gap-3 mb-4 flex-wrap">
-          <button onClick={() => quickAction('Summarize Apple 10-Q')} className="badge-soft">Summarize Apple 10-Q</button>
-          <button onClick={() => quickAction('Generate signal for NVDA')} className="badge-soft">Generate signal for NVDA</button>
-          <button onClick={() => quickAction('Backtest strategy X')} className="badge-soft">Backtest strategy X</button>
-          <label className="badge-soft cursor-pointer">
-            Upload PDF/CSV
-            <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
-          </label>
-          {uploadName && <div className="text-xs text-muted px-2">{uploadName}</div>}
+      <div className="glass rounded-2xl p-4 shadow-xl relative" style={{minHeight: 360}}>
+        {/* Compact header with actions popover */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm font-semibold text-white">PeekoChat</div>
+          <div className="relative">
+            <button onClick={() => setShowActions(s => !s)} aria-expanded={showActions} className="px-3 py-1 rounded-md badge-soft">Actions ▾</button>
+            {showActions && (
+              <div className="absolute right-0 mt-2 w-64 bg-slate-900/80 border border-slate-700 rounded-lg p-3 shadow-lg z-40">
+                <div className="flex flex-col gap-2">
+                  <button onClick={() => { quickAction('Summarize Apple 10-Q'); setShowActions(false) }} className="text-left badge-soft">Summarize Apple 10-Q</button>
+                  <button onClick={() => { quickAction('Generate signal for NVDA'); setShowActions(false) }} className="text-left badge-soft">Generate signal for NVDA</button>
+                  <button onClick={() => { quickAction('Backtest strategy X'); setShowActions(false) }} className="text-left badge-soft">Backtest strategy X</button>
+                  <label className="cursor-pointer badge-soft text-left" onClick={() => setShowActions(false)}>
+                    Upload PDF/CSV
+                    <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Chat area */}
@@ -146,8 +156,14 @@ export default function ChatWidget() {
             rows={1}
           />
 
-          <button onClick={() => send()} disabled={sending} className="btn-cta px-4 py-2">{sending ? 'Thinking…' : 'Send'}</button>
-          <button onClick={exportChat} className="cta-ghost px-4 py-2">Export Chat</button>
+          <div className="flex items-center gap-2">
+            <label className="inline-flex items-center px-3 py-2 rounded-md bg-slate-700/20 cursor-pointer text-sm" title="Upload PDF/CSV">
+              <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
+              Upload
+            </label>
+            <button onClick={() => send()} disabled={sending} className="btn-cta px-4 py-2">{sending ? 'Thinking…' : 'Send'}</button>
+            <button onClick={exportChat} className="cta-ghost px-4 py-2">Export Chat</button>
+          </div>
         </div>
 
         {/* Optional small preview area for uploaded content */}
