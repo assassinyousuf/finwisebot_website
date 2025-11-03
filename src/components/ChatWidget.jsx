@@ -17,6 +17,19 @@ export default function ChatWidget() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [messages])
 
+  // Listen for demo visualizer signals and insert a chat message
+  useEffect(() => {
+    function onSignal(e) {
+      const signal = e && e.detail ? e.detail : null
+      if (!signal) return
+      setMessages(m => [...m, { from: 'bot', text: `Signal for ${signal.symbol}: ${signal.title}. ${signal.summary}`, createdAt: new Date() }])
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('fw:signal', onSignal)
+    }
+    return () => { if (typeof window !== 'undefined') window.removeEventListener('fw:signal', onSignal) }
+  }, [])
+
   // PeekoChat onboarding and preselected symbol handling
   useEffect(() => {
     let mounted = true

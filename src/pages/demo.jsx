@@ -17,6 +17,13 @@ const DemoBackground = dynamic(() => import('../components/DemoBackground'), { s
 export default function Demo() {
   // Demo now uses unified ChatWidget (PeekoChat)
 
+  function handleSignalClick(signal) {
+    // dispatch a cross-component event that ChatWidget listens for
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('fw:signal', { detail: signal }))
+    }
+  }
+
   return (
   <div className="flex flex-col min-h-screen relative overflow-hidden bg-slate-900 text-white">
       <DemoBackground />
