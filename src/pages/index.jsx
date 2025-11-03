@@ -105,9 +105,12 @@ function LiveNews(){
     { text: 'NVDA extends rally on AI chip demand', ticker: 'NVDA' },
     { text: 'MSFT sees steady cloud growth in Q3', ticker: 'MSFT' },
   ]
+  // Avoid rendering timestamps during SSR to prevent hydration mismatches.
+  const [mounted, setMounted] = useState(false)
   const [feed, setFeed] = useState(() => samples.map((s,i)=>({ ...s, id: i, time: Date.now() - (i*60000) })))
 
   useEffect(() => {
+    setMounted(true)
     const t = setInterval(() => {
       const item = samples[Math.floor(Math.random()*samples.length)]
       const rec = { ...item, id: Date.now(), time: Date.now() }
@@ -122,7 +125,7 @@ function LiveNews(){
         <div key={f.id} className="flex items-start justify-between p-3 rounded-md bg-slate-900/30">
           <div>
             <div className="text-sm text-slate-200">{f.text}</div>
-            <div className="text-xs text-slate-400 mt-1">{f.ticker} · {new Date(f.time).toLocaleTimeString()}</div>
+            <div className="text-xs text-slate-400 mt-1">{f.ticker}{mounted ? ` · ${new Date(f.time).toLocaleTimeString()}` : ''}</div>
           </div>
           <div className="ml-4 text-xs text-emerald-300 font-semibold">LIVE</div>
         </div>
