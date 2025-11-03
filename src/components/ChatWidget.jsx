@@ -141,7 +141,8 @@ export default function ChatWidget() {
           <div className="flex items-center gap-3">
             {/* icon: use /peekochat.png if available, otherwise fallback to initials avatar */}
             <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-800 flex items-center justify-center">
-              <img src="/peekochat.png" alt="PeekoChat" onError={(e)=>{ e.currentTarget.onerror=null; e.currentTarget.src='/peekochat.svg' }} className="w-full h-full object-cover" />
+              {/* Prefer the SVG you provided directly to avoid a missing-PNG fallback cycle */}
+              <img src="/peekochat.svg" alt="PeekoChat" onError={(e)=>{ e.currentTarget.style.display='none' }} className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="text-sm font-semibold text-white">PeekoChat</div>
