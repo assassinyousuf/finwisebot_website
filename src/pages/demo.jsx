@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatWidget from '../components/ChatWidget';
+import mockApi from '../lib/mockApi';
 import { useRouter } from 'next/router'
 
 // Dynamically load heavy visual components client-side to reduce initial bundle size
@@ -16,9 +17,26 @@ const DemoVisualizer = dynamic(() => import('../components/DemoVisualizer'), {
 const DemoBackground = dynamic(() => import('../components/DemoBackground'), { ssr: false });
 
 export default function Demo() {
-  // Redirect /demo to canonical /peekochat and keep a small signal bridge
+  // If the user is logged in, send them to the canonical /peekochat page.
+  // If not logged in, keep them on the demo page (simpler demo chat).
   const router = useRouter()
-  useEffect(() => { router.replace('/peekochat') }, [router])
+  useEffect(() => {
+    let mounted = true
+    async function check() {
+      try {
+        const j = await mockApi.getMe()
+        if (!mounted) return
+        if (j && j.ok && j.user) {
+          // signed in → go to advanced PeekoChat
+          router.replace('/peekochat')
+        }
+      } catch (e) {
+        // on error, stay on demo
+      }
+    }
+    check()
+    return () => { mounted = false }
+  }, [router])
 
   function handleSignalClick(signal) {
     // dispatch a cross-component event that ChatWidget listens for
