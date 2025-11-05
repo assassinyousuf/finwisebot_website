@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export default function FeatureCard({ title, description, icon, accent = 'from-green-400 to-emerald-400', slug = '', dark = false }) {
-  const containerCls = 'p-6 rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all entrance';
+  const containerCls = 'p-6 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-green-400/20 transform hover:-translate-y-1 hover:scale-105 transition-all entrance';
   const textCls = 'text-sm';
   const iconText = 'text-lg';
 

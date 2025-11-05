@@ -13,6 +13,7 @@ const DemoVisualizer = dynamic(() => import('../components/DemoVisualizer'), {
     <div className="h-24 w-full flex items-center justify-center text-sm text-gray-400">Loading visualizer...</div>
   ),
 });
+import SignalGenerator from '../components/SignalGenerator';
 
 const DemoBackground = dynamic(() => import('../components/DemoBackground'), { ssr: false });
 
@@ -59,6 +60,9 @@ export default function Demo() {
 
         <aside className="w-96">
           <DemoVisualizer onSignalClick={handleSignalClick} />
+          <div className="mt-4">
+            <SignalGenerator onEmit={handleSignalClick} />
+          </div>
         </aside>
       </main>
       <Footer />

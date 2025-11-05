@@ -74,7 +74,7 @@ export default function ChatWidget() {
       const j = await mockApi.chat({ query: q })
       setMessages(m => {
         const copy = m.slice(0, -1)
-        return [...copy, { from: 'bot', text: j.chat.answer, createdAt: new Date() }]
+        return [...copy, { from: 'bot', text: j.chat.answer, citations: j.chat.citations || [], createdAt: new Date() }]
       })
     } catch (err) {
       setMessages(m => {
@@ -165,6 +165,22 @@ export default function ChatWidget() {
           {messages.map((m, i) => (
             <div key={i} className={`max-w-[85%] px-3 py-2 rounded-lg ${m.from === 'user' ? 'ml-auto' : (m.from === 'bot' ? 'mr-auto' : 'mx-auto')}`} style={{background: m.from === 'user' ? 'var(--accent)' : m.from === 'bot' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.02)', color: m.from === 'user' ? 'var(--text-on-accent)' : 'var(--text-primary)'}}>
               <div className="text-sm whitespace-pre-wrap">{m.text}</div>
+
+              {/* render citations when present (frontend-only mock) */}
+              {m.citations && m.citations.length > 0 && (
+                <div className="mt-2 border-t border-slate-700 pt-2 text-xs text-muted">
+                  <div className="font-semibold text-[12px] mb-1">Sources</div>
+                  <ul className="list-disc pl-4 space-y-2">
+                    {m.citations.map((s, idx) => (
+                      <li key={idx}>
+                        <a href={s.href} target="_blank" rel="noreferrer" className="text-emerald-300 underline">{s.label || s.href}</a>
+                        {s.snippet && <div className="text-[11px] text-muted mt-1 whitespace-pre-wrap">{s.snippet}</div>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {m.createdAt && <div className="text-[10px] text-muted mt-1">{new Date(m.createdAt).toLocaleTimeString()}</div>}
             </div>
           ))}

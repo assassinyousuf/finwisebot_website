@@ -7,6 +7,12 @@ export default function AnimatedSignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [displayName, setDisplayName] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [company, setCompany] = useState('')
+  const [title, setTitle] = useState('')
+  const [avatarData, setAvatarData] = useState(null)
+  const [avatarError, setAvatarError] = useState('')
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -29,14 +35,20 @@ export default function AnimatedSignupForm() {
 
     setLoading(true);
     try {
-      const data = await mockApi.login({ email })
-      if (!data || !data.ok) {
+      // call demo signup that creates user and sets profile fields
+      const res = await mockApi.signup({ email, password, displayName, fullName, company, title, avatar: avatarData })
+      if (!res || !res.ok) {
         setMessage('Signup failed')
       } else {
         setMessage('Account created — signed in (demo)')
         setEmail('')
         setPassword('')
         setConfirm('')
+        setDisplayName('')
+        setFullName('')
+        setCompany('')
+        setTitle('')
+        setAvatarData(null)
         setTimeout(() => router.push('/'), 700)
       }
     } catch (err) {
@@ -72,6 +84,31 @@ export default function AnimatedSignupForm() {
             required
             aria-required="true"
           />
+
+          <label className="text-xs text-muted">Display name</label>
+          <input className="input" value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="How should we call you? (e.g. Alice)" />
+
+          <label className="text-xs text-muted">Full name</label>
+          <input className="input" value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="Your full name (optional)" />
+
+          <label className="text-xs text-muted">Company</label>
+          <input className="input" value={company} onChange={e=>setCompany(e.target.value)} placeholder="Company (optional)" />
+
+          <label className="text-xs text-muted">Title</label>
+          <input className="input" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Role / title (optional)" />
+
+          <label className="text-xs text-muted">Avatar (optional)</label>
+          <input type="file" accept="image/*" onChange={(e)=>{
+            setAvatarError('')
+            const f = e.target.files && e.target.files[0]
+            if (!f) return
+            const maxBytes = 2 * 1024 * 1024
+            const allowed = ['image/png','image/jpeg','image/jpg','image/webp']
+            if (f.size > maxBytes) { setAvatarError('File too large (max 2 MB)'); return }
+            if (!allowed.includes(f.type)) { setAvatarError('Unsupported image type') ; return }
+            const reader = new FileReader(); reader.onload = ()=> setAvatarData(String(reader.result)); reader.readAsDataURL(f)
+          }} />
+          {avatarError && <div className="text-sm text-red-400">{avatarError}</div>}
 
           <label className="text-xs text-muted">Password</label>
           <input

@@ -36,6 +36,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-6 text-sm" style={{color:'var(--muted)'}}>
           <Link href="/" className="hover:text-white transition">Home</Link>
           <Link href="/features" className="hover:text-white transition">Features</Link>
+          <Link href="/news" className="hover:text-white transition">News</Link>
           <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
           <Link href="/demo" className="hover:text-white transition">PeekoChat</Link>
           {/* Admin link shown only if user has admin role */}
@@ -45,7 +46,7 @@ export default function Navbar() {
           {!user && (
             <Link href="/reports" className="hover:text-white transition">Reports</Link>
           )}
-          <Link href="/settings" className="hover:text-white transition">Settings</Link>
+          <Link href="/user" className="hover:text-white transition">User</Link>
         </div>
         <div className="hidden md:flex items-center gap-3">
             {user ? (
@@ -80,10 +81,11 @@ export default function Navbar() {
           <div className="flex flex-col gap-3 text-sm text-white/80">
             <Link href="/">Home</Link>
             <Link href="/features">Features</Link>
+            <Link href="/news">News</Link>
             <Link href="/pricing">Pricing</Link>
             <Link href="/demo">PeekoChat</Link>
             {!user && <Link href="/reports">Reports</Link>}
-            <Link href="/settings">Settings</Link>
+            <Link href="/user">User</Link>
             {user ? (
               <>
                 <div className="text-sm text-white/80">{user.email}</div>
@@ -92,7 +94,7 @@ export default function Navbar() {
                   setUser(null)
                   window.location.href = '/'
                 }} className="text-left text-sm text-white/70">Logout</button>
-                <Link href="/settings" className="mt-2 bg-accent text-black px-4 py-2 rounded-lg text-sm font-semibold">Settings</Link>
+                <Link href="/user" className="mt-2 bg-accent text-black px-4 py-2 rounded-lg text-sm font-semibold">User</Link>
               </>
             ) : (
               <>
