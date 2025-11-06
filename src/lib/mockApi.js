@@ -45,10 +45,8 @@ if (typeof window !== 'undefined') {
   ])
   // Set default Google Gemini API key if not set
   const settings = read('settings', {})
-  if (!settings.chat_api_key) {
-    settings.chat_api_key = 'AIzaSyC5slDlYLz-4p7nhO5-g4Ot4R1gzHfmu6Y'
-    write('settings', settings)
-  }
+  // API key should be set via environment variables, not hardcoded
+  write('settings', settings)
 }
 
 const mockApi = {
