@@ -29,8 +29,12 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="glass border rounded-2xl px-4 py-3 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-400 flex items-center justify-center">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black/10 backdrop-blur-sm border border-white/8"></div>
+            <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
+              <img 
+                src="/finewisbot.svg" 
+                alt="FinWiseBot Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <h1 className="text-white text-base sm:text-lg font-heading neon">FinWisebot</h1>
           </div>

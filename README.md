@@ -1,6 +1,6 @@
 # 🚀 FinWisebot - AI-Powered Financial Analysis Platform
 
-![FinWisebot Logo](public/peekochat.svg)
+![FinWisebot Logo](public/finewisbot.svg)
 
 **FinWisebot** is a cutting-edge, modern financial analysis platform that combines artificial intelligence with real-time market data visualization. Built with Next.js 14 and featuring a stunning glassmorphism UI, it provides comprehensive financial insights, AI-powered chat interactions, predictive analytics, and interactive market visualizations.
 
@@ -107,7 +107,8 @@ finwisebot_website/
 │       └── storage.js        # localStorage utilities
 ├── public/                   # Static assets
 │   ├── favicon.svg          # Site favicon
-│   └── peekochat.svg        # Peeko logo
+│   ├── finewisbot.svg       # Main FinWiseBot logo
+│   └── peekochat.svg        # PeekoChat logo
 ├── scripts/                 # Build and deployment scripts
 ├── docs/                    # Documentation
 ├── langui/                  # Component preview system
