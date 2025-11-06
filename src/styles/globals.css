@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import component styles */
+@import './components.css';
+
 /* Design tokens and theming */
 :root {
   /* Light theme tokens (default) */
@@ -14,8 +17,8 @@
   --text-on-accent: #fff;
 }
 
-/* Dark theme overrides (applied by .theme-dark on <html>) */
-.theme-dark {
+/* Dark theme overrides (applied by .dark on <html>) */
+.dark {
   --bg-900: #071428;
   --bg-800: #0a1931;
   --panel: rgba(255,255,255,0.04);

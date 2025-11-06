@@ -62,30 +62,58 @@ export default function News() {
   };
 
   return (
-    <div className="bg-slate-900 text-white min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse animation-delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
+      </div>
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-cyan-400/30 rounded-full animate-ping"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${3 + Math.random() * 2}s`
+            }}
+          ></div>
+        ))}
+      </div>
+
       <Navbar />
 
-      <main className="max-w-6xl mx-auto p-8">
+      <main className="relative z-10 max-w-6xl mx-auto p-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-heading font-bold mb-4">FinWise News</h1>
-          <p className="text-gray-300">Stay updated with the latest financial news from Yahoo Finance. Click on any article to read more.</p>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4">
+            <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
+              FinWise
+            </span>
+            <span className="text-white"> News</span>
+          </h1>
+          <p className="text-gray-300 text-lg">Stay updated with the latest financial news from Yahoo Finance. Click on any article to read more.</p>
         </div>
 
         {/* Market Overview Section */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold mb-6 text-green-300">Market Overview</h2>
+          <h2 className="text-2xl font-bold mb-6 text-cyan-400">Market Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Dow Jones */}
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold">Dow Jones</h3>
-                  <div className="text-2xl font-bold text-green-400">42,500.25</div>
-                  <div className="text-sm text-green-300">+1.25% (+525.50)</div>
+                  <h3 className="text-lg font-semibold text-white">Dow Jones</h3>
+                  <div className="text-2xl font-bold text-cyan-400">42,500.25</div>
+                  <div className="text-sm text-cyan-300">+1.25% (+525.50)</div>
                 </div>
                 <div className="text-right text-xs text-gray-400">Today</div>
               </div>
-              <svg width="100%" height="60" viewBox="0 0 200 60" className="text-green-400">
+              <svg width="100%" height="60" viewBox="0 0 200 60" className="text-cyan-400">
                 {/* Grid lines */}
                 <line x1="0" y1="15" x2="200" y2="15" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                 <line x1="0" y1="30" x2="200" y2="30" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
@@ -107,16 +135,16 @@ export default function News() {
             </div>
 
             {/* S&P 500 */}
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold">S&P 500</h3>
-                  <div className="text-2xl font-bold text-green-400">5,680.50</div>
-                  <div className="text-sm text-green-300">+0.95% (+53.25)</div>
+                  <h3 className="text-lg font-semibold text-white">S&P 500</h3>
+                  <div className="text-2xl font-bold text-purple-400">5,680.50</div>
+                  <div className="text-sm text-purple-300">+0.95% (+53.25)</div>
                 </div>
                 <div className="text-right text-xs text-gray-400">Today</div>
               </div>
-              <svg width="100%" height="60" viewBox="0 0 200 60" className="text-green-400">
+              <svg width="100%" height="60" viewBox="0 0 200 60" className="text-purple-400">
                 {/* Grid lines */}
                 <line x1="0" y1="15" x2="200" y2="15" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                 <line x1="0" y1="30" x2="200" y2="30" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
@@ -138,16 +166,16 @@ export default function News() {
             </div>
 
             {/* Nasdaq */}
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold">Nasdaq</h3>
-                  <div className="text-2xl font-bold text-red-400">17,250.75</div>
-                  <div className="text-sm text-red-300">-0.45% (-78.25)</div>
+                  <h3 className="text-lg font-semibold text-white">Nasdaq</h3>
+                  <div className="text-2xl font-bold text-pink-400">17,250.75</div>
+                  <div className="text-sm text-pink-300">-0.45% (-78.25)</div>
                 </div>
                 <div className="text-right text-xs text-gray-400">Today</div>
               </div>
-              <svg width="100%" height="60" viewBox="0 0 200 60" className="text-red-400">
+              <svg width="100%" height="60" viewBox="0 0 200 60" className="text-pink-400">
                 {/* Grid lines */}
                 <line x1="0" y1="15" x2="200" y2="15" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                 <line x1="0" y1="30" x2="200" y2="30" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
@@ -172,17 +200,17 @@ export default function News() {
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-400"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400"></div>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {news.map((item) => (
               <article
                 key={item.id || item.title}
-                className="bg-white/5 rounded-xl p-6 hover:bg-white/10 transition cursor-pointer border border-white/10"
+                className="bg-white/5 backdrop-blur-sm rounded-xl p-6 hover:bg-white/10 transition-all duration-300 cursor-pointer border border-white/10 hover:border-cyan-400/30 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-400/20"
                 onClick={() => window.open(item.url, '_blank')}
               >
-                <h2 className="text-xl font-semibold mb-3 text-green-300 hover:text-green-200 transition">
+                <h2 className="text-xl font-semibold mb-3 text-cyan-300 hover:text-cyan-200 transition-colors">
                   {item.title}
                 </h2>
                 <p className="text-gray-300 mb-4 text-sm leading-relaxed">
@@ -190,7 +218,7 @@ export default function News() {
                 </p>
                 <div className="flex items-center justify-between text-xs text-gray-400">
                   <span>{formatDate(item.publishedAt)}</span>
-                  <span className="text-green-400">Read more →</span>
+                  <span className="text-cyan-400 hover:text-cyan-300 transition-colors">Read more →</span>
                 </div>
               </article>
             ))}

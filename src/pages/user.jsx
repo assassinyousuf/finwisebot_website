@@ -124,137 +124,348 @@ export default function UserPage() {
   }
 
   return (
-    <div className="container py-12">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-heading">User</h1>
+    <div className="container py-8 sm:py-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-heading">User</h1>
         <div className="flex gap-3">
-          <Link href="/" className="text-sm text-white/80">Home</Link>
-          <Link href="/reports" className="text-sm text-white/80">Reports</Link>
+          <Link href="/" className="text-sm text-white/80 hover:text-white transition">Home</Link>
+          <Link href="/reports" className="text-sm text-white/80 hover:text-white transition">Reports</Link>
         </div>
       </div>
 
       <div className="grid-cards">
         <div className="card" style={{ gridColumn: 'span 2' }}>
-          <div className="flex items-start gap-4">
-            <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-black font-bold text-2xl">{user && user.email ? user.email[0].toUpperCase() : 'U'}</div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold">{user ? (user.email.split('@')[0]) : 'User'}</h2>
-              <div className="muted-sm">{user ? user.email : ''}</div>
-              <div className="mt-3 grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <div className="text-2xl font-bold">{chatsCount}</div>
-                  <div className="muted-sm">Chats</div>
+          <div className="flex flex-col sm:flex-row sm:items-start gap-6">
+            {/* Avatar Section */}
+            <div className="flex flex-col items-center sm:items-start gap-3">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-black font-bold text-3xl sm:text-4xl flex-shrink-0 shadow-lg">
+                {user && user.avatar ? (
+                  <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  user && user.email ? user.email[0].toUpperCase() : 'U'
+                )}
+              </div>
+              <button onClick={()=>setEditingProfile(true)} className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
+                Edit Profile
+              </button>
+            </div>
+
+            {/* User Info Section */}
+            <div className="flex-1 text-center sm:text-left">
+              <h2 className="text-2xl sm:text-3xl font-semibold mb-1">
+                {user ? (user.displayName || user.email.split('@')[0]) : 'User'}
+              </h2>
+              <div className="text-white/70 text-lg mb-4">{user ? user.email : ''}</div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="bg-white/5 rounded-lg p-3 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-accent">{chatsCount}</div>
+                  <div className="text-white/60 text-sm">Chats</div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold">{predsCount}</div>
-                  <div className="muted-sm">Predictions</div>
+                <div className="bg-white/5 rounded-lg p-3 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-accent">{predsCount}</div>
+                  <div className="text-white/60 text-sm">Predictions</div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold">{user && (user.roles && user.roles.length ? user.roles.join(', ') : 'user')}</div>
-                  <div className="muted-sm">Role(s)</div>
+                <div className="bg-white/5 rounded-lg p-3 text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-accent">
+                    {user && user.roles && user.roles.includes('admin') ? 'Admin' : 'User'}
+                  </div>
+                  <div className="text-white/60 text-sm">Role</div>
                 </div>
               </div>
-              <div className="mt-3 text-xs muted-sm">ID: <span className="font-mono">{user && (user.id || user._id || '—')}</span></div>
-              {lastActive && <div className="text-xs muted-sm mt-1">Last activity: {lastActive}</div>}
+
+              {/* Additional Info */}
+              <div className="space-y-2 text-sm text-white/60">
+                {user && user.fullName && <div><strong className="text-white/80">Full Name:</strong> {user.fullName}</div>}
+                {user && user.company && <div><strong className="text-white/80">Company:</strong> {user.company}</div>}
+                {user && user.title && <div><strong className="text-white/80">Title:</strong> {user.title}</div>}
+                {lastActive && <div><strong className="text-white/80">Last Active:</strong> {lastActive}</div>}
+                <div><strong className="text-white/80">Member Since:</strong> {inferJoined(user) || '—'}</div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* More information box */}
+        {/* Account Details */}
         <div className="card">
-          <h3 className="text-lg font-semibold">Account details</h3>
-          {loading ? <div className="muted-sm mt-3">Loading…</div> : (
-            <div className="mt-3 text-sm space-y-2">
-              <div><strong>Joined:</strong> {inferJoined(user) || '—'}</div>
-              <div><strong>Email:</strong> {user ? user.email : '—'}</div>
-              <div><strong>Member type:</strong> {user && user.roles && user.roles.includes('admin') ? 'Administrator' : 'Standard'}</div>
-              <div><strong>Local storage key:</strong> <span className="font-mono">finwise_mock_currentUser</span></div>
-                    <div className="muted-sm">This page shows local/demo-only account info stored in the browser.</div>
-                    <div className="mt-2">
-                      <button onClick={()=>setEditingProfile(true)} className="px-3 py-1 bg-white/5 rounded text-sm">Edit profile</button>
-                    </div>
+          <h3 className="text-lg font-semibold mb-4">Account Details</h3>
+          {loading ? (
+            <div className="text-white/60">Loading…</div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b border-white/10">
+                <span className="text-white/80 font-medium">Email</span>
+                <span className="text-white/60">{user ? user.email : '—'}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-white/10">
+                <span className="text-white/80 font-medium">Account Type</span>
+                <span className="text-white/60">
+                  {user && user.roles && user.roles.includes('admin') ? 'Administrator' : 'Standard User'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-white/10">
+                <span className="text-white/80 font-medium">Member Since</span>
+                <span className="text-white/60">{inferJoined(user) || '—'}</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-white/80 font-medium">User ID</span>
+                <span className="text-white/60 font-mono text-xs">{user && (user.id || user._id || '—')}</span>
+              </div>
+              <div className="mt-4 pt-3 border-t border-white/10">
+                <div className="text-xs text-white/50">
+                  This is a demo account stored locally in your browser.
+                  Data persists across sessions but is not shared with any server.
+                </div>
+              </div>
             </div>
           )}
         </div>
 
               <div
-                className={`card overflow-hidden transition-all duration-300 ${editingProfile ? 'max-h-[800px] opacity-100 scale-100 pointer-events-auto' : 'max-h-0 opacity-0 scale-95 pointer-events-none'}`}
+                className={`card overflow-hidden transition-all duration-300 ${editingProfile ? 'max-h-[600px] opacity-100 scale-100 pointer-events-auto' : 'max-h-0 opacity-0 scale-95 pointer-events-none'}`}
                 style={{ gridColumn: 'span 2' }}
                 aria-hidden={!editingProfile}
               >
-                <h3 className="text-lg font-semibold">Edit profile</h3>
-                <form onSubmit={saveProfile} className="mt-3 space-y-3">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/5 flex items-center justify-center">
-                      {avatarPreview ? <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover"/> : <div className="font-bold text-2xl">{user && user.email ? user.email[0].toUpperCase() : 'U'}</div>}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold">Edit Profile</h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingProfile(false);
+                      setDisplayName(user && user.displayName ? user.displayName : '');
+                      setAvatarPreview(user && user.avatar ? user.avatar : null);
+                      setAvatarError('');
+                    }}
+                    className="text-white/60 hover:text-white transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form onSubmit={saveProfile} className="space-y-6">
+                  {/* Avatar Section */}
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-black font-bold text-2xl flex-shrink-0">
+                      {avatarPreview ? (
+                        <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        user && user.email ? user.email[0].toUpperCase() : 'U'
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <input className="input" placeholder="Display name" value={displayName} onChange={e=>setDisplayName(e.target.value)} />
-                      <div className="mt-2">
-                        <input type="file" accept="image/*" onChange={onAvatarChange} />
-                        {avatarError && <div className="text-sm text-red-400 mt-2">{avatarError}</div>}
-                        <div className="text-xs muted-sm mt-1">Accepted: PNG, JPG, WebP. Max: 2 MB.</div>
-                      </div>
+                    <div className="flex-1 w-full">
+                      <label className="block text-sm font-medium text-white/80 mb-2">Profile Picture</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={onAvatarChange}
+                        className="w-full text-sm text-white/80 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-accent file:text-black hover:file:bg-accent/80 transition-colors"
+                      />
+                      {avatarError && <div className="text-sm text-red-400 mt-2">{avatarError}</div>}
+                      <div className="text-xs text-white/50 mt-1">Accepted: PNG, JPG, WebP. Max: 2 MB.</div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button className="btn-cta" disabled={!!avatarError}>Save profile</button>
-                    <button type="button" className="cta-ghost" onClick={()=>{ setEditingProfile(false); setDisplayName(user && user.displayName ? user.displayName : ''); setAvatarPreview(user && user.avatar ? user.avatar : null) }}>Cancel</button>
+
+                  {/* Display Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-2">Display Name</label>
+                    <input
+                      type="text"
+                      value={displayName}
+                      onChange={e => setDisplayName(e.target.value)}
+                      placeholder="How should we call you?"
+                      className="input w-full"
+                    />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/10">
+                    <button
+                      type="submit"
+                      className="btn-cta flex-1"
+                      disabled={!!avatarError}
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingProfile(false);
+                        setDisplayName(user && user.displayName ? user.displayName : '');
+                        setAvatarPreview(user && user.avatar ? user.avatar : null);
+                        setAvatarError('');
+                      }}
+                      className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </form>
               </div>
 
-        {/* Compact change password card */}
+        {/* Security Settings */}
         <div className="card">
-          <h3 className="text-lg font-semibold">Security</h3>
-          <div className="mt-3">
-            {loading ? <div className="muted-sm">Loading…</div> : (
-              user ? (
-                <>
-                  {!showChange ? (
+          <h3 className="text-lg font-semibold mb-4">Security</h3>
+          <div>
+            {loading ? (
+              <div className="text-white/60">Loading…</div>
+            ) : user ? (
+              <>
+                {!showChange ? (
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="text-sm muted-sm">Password management</div>
-                      <button onClick={()=>setShowChange(true)} className="px-3 py-1 bg-accent text-black rounded text-sm">Change</button>
+                      <div>
+                        <div className="text-white/80 font-medium">Password</div>
+                        <div className="text-white/60 text-sm">Last changed: Never (demo)</div>
+                      </div>
+                      <button
+                        onClick={() => setShowChange(true)}
+                        className="px-4 py-2 bg-accent text-black rounded-lg hover:bg-accent/80 transition-colors text-sm font-medium"
+                      >
+                        Change Password
+                      </button>
                     </div>
-                  ) : (
-                    <form onSubmit={handleChangePassword} className="mt-3 space-y-2">
-                      {/* compact form: if current required, show it */}
-                      <div className="space-y-1">
-                        <input type="password" value={curPwd} onChange={e=>setCurPwd(e.target.value)} className="input" placeholder="Current password (demo)" />
-                        <input type="password" value={newPwd} onChange={e=>setNewPwd(e.target.value)} className="input" placeholder="New password" />
-                        <input type="password" value={confirmPwd} onChange={e=>setConfirmPwd(e.target.value)} className="input" placeholder="Confirm new password" />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button className="btn-cta px-3 py-1" disabled={pwdSaving}>{pwdSaving ? 'Saving…' : 'Save'}</button>
-                        <button type="button" className="cta-ghost px-3 py-1" onClick={()=>{ setShowChange(false); setCurPwd(''); setNewPwd(''); setConfirmPwd(''); setPwdMsg('') }}>Cancel</button>
-                      </div>
-                      {pwdMsg && <div className="mt-2 text-sm">{pwdMsg}</div>}
-                    </form>
-                  )}
-                  <div className="mt-3 text-xs">
-                    <Link href="/reset/request" className="text-accent underline">Forgot password?</Link>
+                    <div className="pt-3 border-t border-white/10">
+                      <Link
+                        href="/reset/request"
+                        className="text-accent hover:text-accent/80 transition-colors text-sm"
+                      >
+                        Forgot your password?
+                      </Link>
+                    </div>
                   </div>
-                </>
-              ) : (
-                <div className="muted-sm">Sign in to manage security settings.</div>
-              )
+                ) : (
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-white/80 mb-1">Current Password</label>
+                        <input
+                          type="password"
+                          value={curPwd}
+                          onChange={e => setCurPwd(e.target.value)}
+                          className="input w-full"
+                          placeholder="Enter current password"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-white/80 mb-1">New Password</label>
+                        <input
+                          type="password"
+                          value={newPwd}
+                          onChange={e => setNewPwd(e.target.value)}
+                          className="input w-full"
+                          placeholder="Enter new password"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-white/80 mb-1">Confirm New Password</label>
+                        <input
+                          type="password"
+                          value={confirmPwd}
+                          onChange={e => setConfirmPwd(e.target.value)}
+                          className="input w-full"
+                          placeholder="Confirm new password"
+                        />
+                      </div>
+                    </div>
+
+                    {pwdMsg && (
+                      <div className={`text-sm p-3 rounded-lg ${
+                        pwdMsg.includes('changed') ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                      }`}>
+                        {pwdMsg}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                      <button
+                        type="submit"
+                        className="btn-cta flex-1"
+                        disabled={pwdSaving}
+                      >
+                        {pwdSaving ? 'Updating…' : 'Update Password'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowChange(false);
+                          setCurPwd('');
+                          setNewPwd('');
+                          setConfirmPwd('');
+                          setPwdMsg('');
+                        }}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </>
+            ) : (
+              <div className="text-white/60">Please sign in to manage security settings.</div>
             )}
           </div>
         </div>
 
-        {/* Admin-only AI card (kept minimal) */}
+        {/* AI Settings */}
         <div className="card">
-          <h2 className="text-lg font-semibold">AI / LLM</h2>
-          <div className="mt-3">
+          <h3 className="text-lg font-semibold mb-4">AI Integration</h3>
+          <div>
             {loading ? (
-              <div className="muted-sm">Loading…</div>
+              <div className="text-white/60">Loading…</div>
             ) : isAdmin ? (
-              <div className="muted-sm">Admin-only API key management is available in the admin panel.</div>
+              <div className="space-y-3">
+                <div className="text-white/80">API Key Management</div>
+                <div className="text-white/60 text-sm">
+                  Configure AI service integrations and manage API keys in the admin panel.
+                </div>
+                <Link
+                  href="/admin"
+                  className="inline-block px-4 py-2 bg-accent text-black rounded-lg hover:bg-accent/80 transition-colors text-sm font-medium"
+                >
+                  Open Admin Panel
+                </Link>
+              </div>
             ) : (
-              <div className="muted-sm">Integration settings are restricted to administrators.</div>
+              <div className="text-white/60">
+                AI integration settings are managed by administrators only.
+              </div>
             )}
           </div>
         </div>
+
+        {/* Recent Activity */}
+        {recentChats.length > 0 && (
+          <div className="card" style={{ gridColumn: 'span 2' }}>
+            <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+            <div className="space-y-3">
+              {recentChats.map((chat, index) => (
+                <div key={chat._id || index} className="flex items-start gap-3 p-3 bg-white/5 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-accent text-sm">💬</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white/80 font-medium text-sm truncate">
+                      {chat.query || 'Chat session'}
+                    </div>
+                    <div className="text-white/60 text-xs mt-1">
+                      {new Date(chat.createdAt).toLocaleDateString()} at {new Date(chat.createdAt).toLocaleTimeString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div className="pt-2 border-t border-white/10">
+                <Link
+                  href="/"
+                  className="text-accent hover:text-accent/80 transition-colors text-sm"
+                >
+                  Start a new chat →
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -28,32 +28,60 @@ export default function Features() {
   }, []);
 
   return (
-    <div className="bg-slate-900 text-white min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse animation-delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
+      </div>
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-cyan-400/30 rounded-full animate-ping"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${3 + Math.random() * 2}s`
+            }}
+          ></div>
+        ))}
+      </div>
+
       <Navbar />
 
-      <header className="hero-bg px-6 py-16 text-white">
+      <header className="relative px-4 sm:px-6 py-12 sm:py-16 text-white">
         <div className="max-w-6xl mx-auto">
-          <div className="hero-card">
-            <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/10">
+            <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-4xl md:text-5xl font-heading font-bold leading-tight mb-4">Powerful features for modern quant finance — demo-ready</h1>
-                <p className="text-gray-200 mb-6">This frontend demo showcases client-side RAG, an interactive Signal Generator, profile & auth flows, and a responsive UI. Backtesting is coming soon as an in-browser demo.</p>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4">
+                  <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
+                    Powerful Features
+                  </span>
+                  <span className="text-white"> for Modern Quant Finance</span>
+                </h1>
+                <p className="text-gray-300 mb-6 text-sm sm:text-base">This frontend demo showcases client-side RAG, an interactive Signal Generator, profile & auth flows, and a responsive UI. Backtesting is coming soon as an in-browser demo.</p>
                 <div className="mt-4 flex flex-col sm:flex-row items-center sm:items-start gap-3 justify-center md:justify-start">
-                  <div className="p-3 bg-white/5 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-green-300">{users.toLocaleString()}</div>
-                    <div className="text-xs text-gray-300">Active users</div>
+                  <div className="p-4 bg-white/5 backdrop-blur-sm rounded-xl text-center w-full sm:w-auto border border-white/10">
+                    <div className="text-2xl font-bold text-cyan-400">{users.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400">Active users</div>
                   </div>
-                  <div className="p-3 bg-white/5 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-amber-300">{strategies.toLocaleString()}</div>
-                    <div className="text-xs text-gray-300">Strategies</div>
+                  <div className="p-4 bg-white/5 backdrop-blur-sm rounded-xl text-center w-full sm:w-auto border border-white/10">
+                    <div className="text-2xl font-bold text-purple-400">{strategies.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400">Strategies</div>
                   </div>
-                  <div className="p-3 bg-white/5 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-cyan-300">{signals.toLocaleString()}</div>
-                    <div className="text-xs text-gray-300">Signals</div>
+                  <div className="p-4 bg-white/5 backdrop-blur-sm rounded-xl text-center w-full sm:w-auto border border-white/10">
+                    <div className="text-2xl font-bold text-pink-400">{signals.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400">Signals</div>
                   </div>
                 </div>
-                <div className="mt-6 flex justify-center">
-                  <svg width="350" height="120" viewBox="0 0 350 120" className="text-green-400">
+                <div className="mt-6 flex justify-center overflow-x-auto">
+                  <svg width="300" height="100" viewBox="0 0 350 120" className="text-cyan-400 min-w-[300px]">
                     {/* Grid lines */}
                     <line x1="0" y1="20" x2="300" y2="20" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                     <line x1="0" y1="50" x2="300" y2="50" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
@@ -75,27 +103,27 @@ export default function Features() {
                     <circle cx="250" cy="50" r="3" fill="currentColor" />
                     <circle cx="300" cy="60" r="3" fill="currentColor" />
                     {/* Price labels */}
-                    <text x="5" y="75" fontSize="9" fill="rgba(255,255,255,0.8)">$100</text>
-                    <text x="55" y="55" fontSize="9" fill="rgba(255,255,255,0.8)">$120</text>
-                    <text x="105" y="85" fontSize="9" fill="rgba(255,255,255,0.8)">$90</text>
-                    <text x="155" y="35" fontSize="9" fill="rgba(255,255,255,0.8)">$140</text>
-                    <text x="205" y="65" fontSize="9" fill="rgba(255,255,255,0.8)">$110</text>
-                    <text x="255" y="45" fontSize="9" fill="rgba(255,255,255,0.8)">$130</text>
-                    <text x="305" y="55" fontSize="9" fill="rgba(255,255,255,0.8)">$115</text>
+                    <text x="5" y="75" fontSize="8" fill="rgba(255,255,255,0.8)">$100</text>
+                    <text x="55" y="55" fontSize="8" fill="rgba(255,255,255,0.8)">$120</text>
+                    <text x="105" y="85" fontSize="8" fill="rgba(255,255,255,0.8)">$90</text>
+                    <text x="155" y="35" fontSize="8" fill="rgba(255,255,255,0.8)">$140</text>
+                    <text x="205" y="65" fontSize="8" fill="rgba(255,255,255,0.8)">$110</text>
+                    <text x="255" y="45" fontSize="8" fill="rgba(255,255,255,0.8)">$130</text>
+                    <text x="305" y="55" fontSize="8" fill="rgba(255,255,255,0.8)">$115</text>
                     {/* Labels */}
-                    <text x="0" y="110" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle">Jan</text>
-                    <text x="50" y="110" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle">Feb</text>
-                    <text x="100" y="110" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle">Mar</text>
-                    <text x="150" y="110" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle">Apr</text>
-                    <text x="200" y="110" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle">May</text>
-                    <text x="250" y="110" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle">Jun</text>
-                    <text x="300" y="110" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle">Jul</text>
-                    <text x="-10" y="20" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle" transform="rotate(-90 -10 20)">$150</text>
-                    <text x="-10" y="50" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle" transform="rotate(-90 -10 50)">$125</text>
-                    <text x="-10" y="80" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle" transform="rotate(-90 -10 80)">$100</text>
-                    <text x="-10" y="100" fontSize="10" fill="rgba(255,255,255,0.7)" textAnchor="middle" transform="rotate(-90 -10 100)">$75</text>
+                    <text x="0" y="110" fontSize="9" fill="rgba(255,255,255,0.7)" textAnchor="middle">Jan</text>
+                    <text x="50" y="110" fontSize="9" fill="rgba(255,255,255,0.7)" textAnchor="middle">Feb</text>
+                    <text x="100" y="110" fontSize="9" fill="rgba(255,255,255,0.7)" textAnchor="middle">Mar</text>
+                    <text x="150" y="110" fontSize="9" fill="rgba(255,255,255,0.7)" textAnchor="middle">Apr</text>
+                    <text x="200" y="110" fontSize="9" fill="rgba(255,255,255,0.7)" textAnchor="middle">May</text>
+                    <text x="250" y="110" fontSize="9" fill="rgba(255,255,255,0.7)" textAnchor="middle">Jun</text>
+                    <text x="300" y="110" fontSize="9" fill="rgba(255,255,255,0.7)" textAnchor="middle">Jul</text>
+                    <text x="-8" y="20" fontSize="8" fill="rgba(255,255,255,0.7)" textAnchor="middle" transform="rotate(-90 -8 20)">$150</text>
+                    <text x="-8" y="50" fontSize="8" fill="rgba(255,255,255,0.7)" textAnchor="middle" transform="rotate(-90 -8 50)">$125</text>
+                    <text x="-8" y="80" fontSize="8" fill="rgba(255,255,255,0.7)" textAnchor="middle" transform="rotate(-90 -8 80)">$100</text>
+                    <text x="-8" y="100" fontSize="8" fill="rgba(255,255,255,0.7)" textAnchor="middle" transform="rotate(-90 -8 100)">$75</text>
                     {/* Title */}
-                    <text x="150" y="10" fontSize="12" fill="rgba(255,255,255,0.9)" textAnchor="middle" fontWeight="bold">Sample Stock Price Trend</text>
+                    <text x="150" y="10" fontSize="11" fill="rgba(255,255,255,0.9)" textAnchor="middle" fontWeight="bold">Sample Stock Price Trend</text>
                   </svg>
                 </div>
               </div>
@@ -104,15 +132,15 @@ export default function Features() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 entrance">
-        <FeatureCard slug="real-time-insights" dark icon="📈" title="Real-Time Insights" description="Summaries from filings, news, and social sentiment (demo data)." accent="from-emerald-300 to-green-400" />
-        <FeatureCard slug="client-rag" dark icon="🧠" title="Client RAG (Demo)" description="In-browser document retrieval and cited answers — useful for demos and prototyping." accent="from-pink-300 to-purple-400" />
-        <FeatureCard slug="signal-engine" dark icon="⚡" title="Signal Generator (Demo)" description="Manually emit sample signals to drive visualizers and chat via the fw:signal bridge." accent="from-yellow-300 to-amber-400" />
-        <FeatureCard slug="backtesting" dark icon="📊" title="Backtesting (Coming Soon)" description="Lightweight in-browser backtest planned — runs simple strategies on uploaded CSVs." accent="from-cyan-300 to-blue-400" />
-        <FeatureCard slug="cited-research" dark icon="🧾" title="Cited Research" description="Every claim can be linked to source snippets in the demo; citations appear under bot replies." accent="from-pink-300 to-purple-400" />
-        <FeatureCard slug="profile-auth" dark icon="👤" title="Profile & Demo Auth" description="Local-only accounts, avatar, and password reset flows for self-contained demos." accent="from-indigo-300 to-violet-400" />
-        <FeatureCard slug="responsive" dark icon="📱" title="Responsive & Accessible" description="Mobile-friendly layout, improved focus states, and ARIA-ready components." accent="from-gray-300 to-slate-400" />
-        <FeatureCard slug="integrations" dark icon="🤝" title="Integrations" description="Connectors & broker integrations planned for later phases." accent="from-emerald-200 to-teal-400" />
+      <main className="relative z-10 max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-6 entrance">
+        <FeatureCard slug="real-time-insights" dark icon="📈" title="Real-Time Insights" description="Summaries from filings, news, and social sentiment (demo data)." accent="from-cyan-400 to-blue-500" />
+        <FeatureCard slug="client-rag" dark icon="🧠" title="Client RAG (Demo)" description="In-browser document retrieval and cited answers — useful for demos and prototyping." accent="from-purple-400 to-pink-500" />
+        <FeatureCard slug="signal-engine" dark icon="⚡" title="Signal Generator (Demo)" description="Manually emit sample signals to drive visualizers and chat via the fw:signal bridge." accent="from-yellow-400 to-orange-500" />
+        <FeatureCard slug="backtesting" dark icon="📊" title="Backtesting (Coming Soon)" description="Lightweight in-browser backtest planned — runs simple strategies on uploaded CSVs." accent="from-cyan-400 to-teal-500" />
+        <FeatureCard slug="cited-research" dark icon="🧾" title="Cited Research" description="Every claim can be linked to source snippets in the demo; citations appear under bot replies." accent="from-purple-400 to-indigo-500" />
+        <FeatureCard slug="profile-auth" dark icon="👤" title="Profile & Demo Auth" description="Local-only accounts, avatar, and password reset flows for self-contained demos." accent="from-blue-400 to-cyan-500" />
+        <FeatureCard slug="responsive" dark icon="📱" title="Responsive & Accessible" description="Mobile-friendly layout, improved focus states, and ARIA-ready components." accent="from-gray-400 to-slate-500" />
+        <FeatureCard slug="integrations" dark icon="🤝" title="Integrations" description="Connectors & broker integrations planned for later phases." accent="from-green-400 to-emerald-500" />
       </main>
 
       <Footer />

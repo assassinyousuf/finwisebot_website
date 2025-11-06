@@ -16,7 +16,7 @@ export default function AnimatedLoginForm() {
     setLoading(true);
     setMessage('');
     try {
-      const data = await mockApi.login({ email })
+      const data = await mockApi.login({ email, password })
       if (!data || !data.ok) {
         setMessage('Login failed')
       } else {

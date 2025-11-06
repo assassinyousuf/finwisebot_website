@@ -8,26 +8,26 @@ export default function Hero({ landing = {}, user = null }) {
   const title = landing?.hero?.title || 'FinWisebot'
   const subtitle = landing?.hero?.subtitle || 'AI analysis, backtesting and cited research — all in one place.'
   return (
-  <header className="hero-bg text-white min-h-[80vh] flex flex-col justify-center items-center text-center p-6 relative overflow-hidden">
+  <header className="hero-bg text-white min-h-[70vh] sm:min-h-[80vh] flex flex-col justify-center items-center text-center p-4 sm:p-6 relative overflow-hidden">
       <AmbientOrbs />
       <div className="container max-w-6xl w-full relative z-40">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <div className="px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-center">
+          <div className="px-2 sm:px-4 order-2 md:order-1">
             <div className="hero-card" style={{background:'var(--panel)', backdropFilter:'blur(8px)'}}>
-              <h1 className="hero-title font-heading mb-4 gradient-text">{title}</h1>
-              <p className="hero-subtitle text-lg mb-6" style={{color:'var(--muted)'}}>{subtitle}</p>
+              <h1 className="hero-title font-heading mb-4 gradient-text text-3xl sm:text-4xl md:text-5xl">{title}</h1>
+              <p className="hero-subtitle text-base sm:text-lg mb-6" style={{color:'var(--muted)'}}>{subtitle}</p>
 
-              <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 flex-wrap justify-center md:justify-start">
                 {user ? (
-                  <a href="/demo" className="cta-primary">Open PeekoChat</a>
+                  <a href="/PeekoChat" className="cta-primary w-full sm:w-auto text-center">Open PeekoChat</a>
                 ) : (
-                  <a href="/demo" className="btn-cta">Try PeekoChat</a>
+                  <a href="/PeekoChat" className="btn-cta w-full sm:w-auto text-center">Try PeekoChat</a>
                 )}
-                <a href="/features" className="cta-ghost">Explore Features</a>
-                <a href="/pricing" className="text-sm text-white/70 px-3 py-2">Pricing</a>
+                <a href="/features" className="cta-ghost w-full sm:w-auto text-center">Explore Features</a>
+                <a href="/pricing" className="text-sm text-white/70 px-3 py-2 w-full sm:w-auto text-center">Pricing</a>
               </div>
 
-              <div className="mt-6 flex items-center gap-3 text-sm text-white/70">
+              <div className="mt-6 flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-white/70">
                 {(landing?.stats || []).map((s) => (
                   <div key={s.label} className="badge-soft">
                     <div className="text-sm font-semibold">{s.value}</div>
@@ -36,15 +36,15 @@ export default function Hero({ landing = {}, user = null }) {
                 ))}
               </div>
 
-              <div className="absolute -right-10 -bottom-10 w-52 h-52 rounded-2xl bg-gradient-to-br from-white/6 to-transparent blur-lg opacity-60 transform rotate-6"></div>
+              <div className="absolute -right-10 -bottom-10 w-32 h-32 sm:w-52 sm:h-52 rounded-2xl bg-gradient-to-br from-white/6 to-transparent blur-lg opacity-60 transform rotate-6"></div>
             </div>
           </div>
 
-          <div className="px-4">
+          <div className="px-2 sm:px-4 order-1 md:order-2">
             <div className="flex justify-center md:justify-end">
               <div className="transform hover:scale-[1.02] transition-all duration-500 entrance">
-                <div className="bg-gradient-to-br from-slate-800/60 to-black/30 rounded-2xl p-6 shadow-2xl glass flex items-center justify-center">
-                  <div style={{ width: 420, maxWidth: '100%' }}>
+                <div className="bg-gradient-to-br from-slate-800/60 to-black/30 rounded-2xl p-4 sm:p-6 shadow-2xl glass flex items-center justify-center">
+                  <div style={{ width: 320, maxWidth: '100%' }} className="sm:w-[420px]">
                     <HeroIllustration />
                   </div>
                 </div>

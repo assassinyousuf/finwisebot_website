@@ -31,6 +31,7 @@ export default function AdminPage() {
         setUsers((uJ && uJ.users) || [])
         setChats((cJ && cJ.chats) || [])
         setSettings({ value: (sJ && sJ.value) || '' })
+        setApiKeyEdit((sJ && sJ.value) || '')
         
         // Load news from localStorage (mock)
         const newsData = JSON.parse(localStorage.getItem('finwise_mock_news') || '[]')
@@ -46,9 +47,9 @@ export default function AdminPage() {
     load()
   }, [])
 
-  if (loading) return <div className="p-8">Loading admin…</div>
-  if (error) return <div className="p-8 text-red-600">{error}</div>
-  if (!me || !me.roles || !me.roles.includes('admin')) return <div className="p-8">Access denied — admin only.</div>
+  if (loading) return <div className="p-8 text-gray-900 dark:text-white">Loading admin…</div>
+  if (error) return <div className="p-8 text-red-600 dark:text-red-400">{error}</div>
+  if (!me || !me.roles || !me.roles.includes('admin')) return <div className="p-8 text-gray-900 dark:text-white">Access denied — admin only.</div>
 
   async function promote(id) {
   const res = await mockApi.promoteUser(id)
@@ -117,19 +118,44 @@ export default function AdminPage() {
   }
 
   async function testServiceAccount() {
-    if (!confirm('Run a quick test of the configured service account?')) return
+    if (!confirm('Run a quick test of the configured Google Gemini API key?')) return
     setSaTestLoading(true)
     setSaTestResult(null)
     try {
-      // local demo: just echo stored settings
-      const s = await mockApi.getSettings('chat_api_key')
-      const j = { ok: true, body: s }
-      setSaTestResult(j)
-      alert('Service account test (local): ' + (s.value ? 'key present' : 'no key'))
+      // Test Google Gemini API with a simple request
+      const apiKey = settings.value || apiKeyEdit
+      if (!apiKey) throw new Error('No API key configured')
+      
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: 'Hello, respond with just "OK" if you can read this.'
+            }]
+          }]
+        })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.candidates && data.candidates[0]) {
+          setSaTestResult({ ok: true })
+          alert('Google Gemini API test successful!')
+        } else {
+          throw new Error('Unexpected API response format')
+        }
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error?.message || `HTTP ${response.status}`)
+      }
     } catch (err) {
       console.error('test service account error', err)
       setSaTestResult({ ok: false, error: String(err) })
-      alert('Service account test error: ' + String(err))
+      alert('Google Gemini API test failed: ' + String(err))
     } finally { setSaTestLoading(false) }
   }
 
@@ -180,20 +206,20 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
-      <div className="max-w-7xl mx-auto p-8">
-        <h1 className="text-3xl font-bold mb-8">FinWise Admin Panel</h1>
+    <div className="min-h-screen bg-gray-900 dark:bg-gray-800 text-gray-900 dark:text-white">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-gray-900 dark:text-white">FinWise Admin Panel</h1>
         
         {/* Tab Navigation */}
-        <div className="flex space-x-1 mb-8 bg-slate-800 p-1 rounded-lg">
+        <div className="flex flex-wrap gap-1 mb-6 sm:mb-8 bg-gray-800 dark:bg-gray-700 p-1 rounded-lg">
           {['overview', 'users', 'content', 'analytics', 'settings'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+              className={`px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition flex-1 sm:flex-none ${
                 activeTab === tab 
                   ? 'bg-green-600 text-white' 
-                  : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                  : 'text-gray-300 dark:text-gray-400 hover:text-white dark:hover:text-gray-100 hover:bg-gray-700 dark:hover:bg-gray-600'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -205,53 +231,53 @@ export default function AdminPage() {
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-4 sm:p-6 text-white">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-blue-100 text-sm">Total Users</p>
-                    <p className="text-3xl font-bold">{users.length}</p>
+                    <p className="text-2xl sm:text-3xl font-bold">{users.length}</p>
                   </div>
-                  <div className="text-4xl">👥</div>
+                  <div className="text-3xl sm:text-4xl">👥</div>
                 </div>
                 <div className="mt-4 text-xs text-blue-200">
                   {users.filter(u => u.roles?.includes('admin')).length} admins
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white">
+              <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-4 sm:p-6 text-white">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-green-100 text-sm">Total Chats</p>
-                    <p className="text-3xl font-bold">{chats.length}</p>
+                    <p className="text-2xl sm:text-3xl font-bold">{chats.length}</p>
                   </div>
-                  <div className="text-4xl">💬</div>
+                  <div className="text-3xl sm:text-4xl">💬</div>
                 </div>
                 <div className="mt-4 text-xs text-green-200">
                   {chats.filter(c => new Date(c.createdAt) > new Date(Date.now() - 24*60*60*1000)).length} today
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-4 sm:p-6 text-white">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-purple-100 text-sm">News Articles</p>
-                    <p className="text-3xl font-bold">{news.length}</p>
+                    <p className="text-2xl sm:text-3xl font-bold">{news.length}</p>
                   </div>
-                  <div className="text-4xl">📰</div>
+                  <div className="text-3xl sm:text-4xl">📰</div>
                 </div>
                 <div className="mt-4 text-xs text-purple-200">
                   {news.filter(n => new Date(n.publishedAt) > new Date(Date.now() - 7*24*60*60*1000)).length} this week
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl p-6 text-white">
+              <div className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl p-4 sm:p-6 text-white">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-orange-100 text-sm">System Status</p>
-                    <p className="text-xl font-bold">Online</p>
+                    <p className="text-lg sm:text-xl font-bold">Online</p>
                   </div>
-                  <div className="text-4xl">⚡</div>
+                  <div className="text-3xl sm:text-4xl">⚡</div>
                 </div>
                 <div className="mt-4 text-xs text-orange-200">
                   Demo Mode
@@ -260,25 +286,25 @@ export default function AdminPage() {
             </div>
 
             {/* Charts and Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
               {/* User Growth Chart */}
-              <div className="bg-slate-800 rounded-xl p-6">
-                <h3 className="text-xl font-semibold mb-4 text-white">User Registration Trend</h3>
-                <div className="h-64 flex items-center justify-center">
+              <div className="bg-gray-800 dark:bg-gray-700 rounded-xl p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-semibold mb-4 text-white dark:text-gray-100">User Registration Trend</h3>
+                <div className="h-48 sm:h-64 flex items-center justify-center">
                   <div className="text-center text-gray-400">
-                    <div className="text-6xl mb-4">📈</div>
-                    <p className="text-lg font-medium">Growth Analytics</p>
+                    <div className="text-4xl sm:text-6xl mb-4">📈</div>
+                    <p className="text-base sm:text-lg font-medium">Growth Analytics</p>
                     <p className="text-sm mt-2">Total Registrations: {users.length}</p>
-                    <div className="mt-4 grid grid-cols-3 gap-4 text-xs">
-                      <div className="bg-slate-700 p-3 rounded">
+                    <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4 text-xs">
+                      <div className="bg-slate-700 p-2 sm:p-3 rounded">
                         <div className="text-green-400 font-bold">+{Math.floor(users.length * 0.3)}</div>
                         <div className="text-gray-400">This Month</div>
                       </div>
-                      <div className="bg-slate-700 p-3 rounded">
+                      <div className="bg-slate-700 p-2 sm:p-3 rounded">
                         <div className="text-blue-400 font-bold">+{Math.floor(users.length * 0.2)}</div>
                         <div className="text-gray-400">Last Month</div>
                       </div>
-                      <div className="bg-slate-700 p-3 rounded">
+                      <div className="bg-slate-700 p-2 sm:p-3 rounded">
                         <div className="text-purple-400 font-bold">{Math.floor(users.length * 0.15)}</div>
                         <div className="text-gray-400">Avg/Month</div>
                       </div>
@@ -288,22 +314,22 @@ export default function AdminPage() {
               </div>
 
               {/* Chat Activity */}
-              <div className="bg-slate-800 rounded-xl p-6">
-                <h3 className="text-xl font-semibold mb-4 text-white">Chat Activity</h3>
-                <div className="h-64 flex items-center justify-center">
+              <div className="bg-gray-800 dark:bg-gray-700 rounded-xl p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-semibold mb-4 text-white dark:text-gray-100">Chat Activity</h3>
+                <div className="h-48 sm:h-64 flex items-center justify-center">
                   <div className="text-center text-gray-400">
-                    <div className="text-6xl mb-4">💬</div>
-                    <p className="text-lg font-medium">Conversation Metrics</p>
+                    <div className="text-4xl sm:text-6xl mb-4">💬</div>
+                    <p className="text-base sm:text-lg font-medium">Conversation Metrics</p>
                     <p className="text-sm mt-2">Total Conversations: {chats.length}</p>
-                    <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
-                      <div className="bg-slate-700 p-3 rounded">
-                        <div className="text-cyan-400 font-bold text-lg">
+                    <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-4 text-xs">
+                      <div className="bg-slate-700 p-2 sm:p-3 rounded">
+                        <div className="text-cyan-400 font-bold text-base sm:text-lg">
                           {chats.length > 0 ? Math.round((chats.reduce((acc, c) => acc + (c.citations?.length || 0), 0) / chats.length) * 10) / 10 : 0}
                         </div>
                         <div className="text-gray-400">Avg Citations</div>
                       </div>
-                      <div className="bg-slate-700 p-3 rounded">
-                        <div className="text-green-400 font-bold text-lg">
+                      <div className="bg-slate-700 p-2 sm:p-3 rounded">
+                        <div className="text-green-400 font-bold text-base sm:text-lg">
                           {chats.filter(c => c.citations && c.citations.length > 0).length}
                         </div>
                         <div className="text-gray-400">Cited Chats</div>
@@ -315,21 +341,21 @@ export default function AdminPage() {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-slate-800 rounded-xl p-6">
-              <h3 className="text-xl font-semibold mb-4 text-white">Recent Activity</h3>
+            <div className="bg-gray-800 dark:bg-gray-700 rounded-xl p-6">
+              <h3 className="text-xl font-semibold mb-4 text-white dark:text-gray-100">Recent Activity</h3>
               <div className="space-y-3">
                 {[...chats.slice(0, 5), ...news.slice(0, 3)].sort((a, b) => new Date(b.createdAt || b.publishedAt) - new Date(a.createdAt || a.publishedAt)).slice(0, 8).map((item, index) => (
-                  <div key={index} className="flex items-center space-x-4 p-3 bg-slate-700 rounded-lg">
+                  <div key={index} className="flex items-center space-x-4 p-3 bg-gray-700 dark:bg-gray-600 rounded-lg">
                     <div className={`w-3 h-3 rounded-full ${item.query ? 'bg-green-400' : 'bg-blue-400'}`}></div>
                     <div className="flex-1">
-                      <p className="text-white text-sm font-medium">
+                      <p className="text-white dark:text-gray-100 text-sm font-medium">
                         {item.query ? `New chat: "${item.query.slice(0, 50)}..."` : `News: "${item.title.slice(0, 50)}..."`}
                       </p>
-                      <p className="text-gray-400 text-xs">
+                      <p className="text-gray-400 dark:text-gray-500 text-xs">
                         {new Date(item.createdAt || item.publishedAt).toLocaleString()}
                       </p>
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       {item.query ? 'Chat' : 'News'}
                     </div>
                   </div>
@@ -848,6 +874,33 @@ export default function AdminPage() {
                     <span className="text-green-400 font-medium">99.97%</span>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* PeekoChat API Key */}
+            <div className="mt-6">
+              <h4 className="font-medium text-white mb-4">PeekoChat Google Gemini API Key</h4>
+              <div className="space-y-2">
+                <input
+                  type="password"
+                  value={apiKeyEdit}
+                  onChange={e => setApiKeyEdit(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white"
+                  placeholder="Enter Google Gemini API key"
+                />
+                <div className="flex space-x-2">
+                  <button onClick={saveApiKey} disabled={saving} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50">
+                    {saving ? 'Saving...' : 'Save API Key'}
+                  </button>
+                  <button onClick={testServiceAccount} disabled={saTestLoading} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">
+                    {saTestLoading ? 'Testing...' : 'Test Connection'}
+                  </button>
+                </div>
+                {saTestResult && (
+                  <div className={`p-2 rounded text-sm ${saTestResult.ok ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200'}`}>
+                    {saTestResult.ok ? 'Connection successful' : `Error: ${saTestResult.error || 'Unknown'}`}
+                  </div>
+                )}
               </div>
             </div>
           </div>

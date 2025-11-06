@@ -121,32 +121,31 @@ export default function ChatWidget() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4">
-      <div className="glass rounded-2xl p-4 shadow-xl relative" style={{minHeight: 360}}>
+    <div className="w-full max-w-4xl mx-auto p-2 sm:p-4">
+      <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 sm:p-4 shadow-xl relative border border-white/10" style={{minHeight: 360}}>
         {/* Compact header with actions popover */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
           <div className="flex items-center gap-3">
             {iconOk ? (
               <img
                 src="/peekochat.svg"
                 alt="PeekoChat"
                 onError={(e) => { setIconOk(false); e.currentTarget.style.display = 'none' }}
-                className="w-8 h-8 rounded"
+                className="w-6 h-6 sm:w-8 sm:h-8 rounded"
               />
             ) : (
-              <div className="w-8 h-8 rounded bg-emerald-500 flex items-center justify-center text-black font-bold">P</div>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded bg-emerald-500 flex items-center justify-center text-black font-bold text-sm sm:text-base">P</div>
             )}
-            <div className="text-sm font-semibold text-white">PeekoChat</div>
           </div>
           <div className="relative">
-            <button onClick={() => setShowActions(s => !s)} aria-expanded={showActions} className="px-3 py-1 rounded-md badge-soft">Actions ▾</button>
+            <button onClick={() => setShowActions(s => !s)} aria-expanded={showActions} className="px-2 sm:px-3 py-1 rounded-md badge-soft text-sm">Actions ▾</button>
             {showActions && (
-              <div className="absolute right-0 mt-2 w-64 bg-slate-900/80 border border-slate-700 rounded-lg p-3 shadow-lg z-40">
+              <div className="absolute right-0 mt-2 w-48 sm:w-64 bg-slate-900/80 border border-slate-700 rounded-lg p-2 sm:p-3 shadow-lg z-40">
                 <div className="flex flex-col gap-2">
-                  <button onClick={() => { quickAction('Summarize Apple 10-Q'); setShowActions(false) }} className="text-left badge-soft">Summarize Apple 10-Q</button>
-                  <button onClick={() => { quickAction('Generate signal for NVDA'); setShowActions(false) }} className="text-left badge-soft">Generate signal for NVDA</button>
-                  <button onClick={() => { quickAction('Backtest strategy X'); setShowActions(false) }} className="text-left badge-soft">Backtest strategy X</button>
-                  <label className="cursor-pointer badge-soft text-left" onClick={() => setShowActions(false)}>
+                  <button onClick={() => { quickAction('Summarize Apple 10-Q'); setShowActions(false) }} className="text-left badge-soft text-sm">Summarize Apple 10-Q</button>
+                  <button onClick={() => { quickAction('Generate signal for NVDA'); setShowActions(false) }} className="text-left badge-soft text-sm">Generate signal for NVDA</button>
+                  <button onClick={() => { quickAction('Backtest strategy X'); setShowActions(false) }} className="text-left badge-soft text-sm">Backtest strategy X</button>
+                  <label className="cursor-pointer badge-soft text-left text-sm" onClick={() => setShowActions(false)}>
                     Upload PDF/CSV
                     <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
                   </label>
@@ -157,18 +156,18 @@ export default function ChatWidget() {
         </div>
 
         {/* Chat area */}
-        <div ref={scrollRef} className="flex flex-col gap-3 h-72 overflow-auto p-3" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.02), transparent)'}}>
+        <div ref={scrollRef} className="flex flex-col gap-2 sm:gap-3 h-64 sm:h-72 overflow-auto p-2 sm:p-3 bg-slate-900/50 rounded-lg border border-white/10">
           {messages.length === 0 && (
-            <div className="text-center text-muted py-12">Try one of the actions above or ask a question below.</div>
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8 sm:py-12 text-sm">Try one of the actions above or ask a question below.</div>
           )}
 
           {messages.map((m, i) => (
-            <div key={i} className={`max-w-[85%] px-3 py-2 rounded-lg ${m.from === 'user' ? 'ml-auto' : (m.from === 'bot' ? 'mr-auto' : 'mx-auto')}`} style={{background: m.from === 'user' ? 'var(--accent)' : m.from === 'bot' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.02)', color: m.from === 'user' ? 'var(--text-on-accent)' : 'var(--text-primary)'}}>
+            <div key={i} className={`max-w-[90%] sm:max-w-[85%] px-2 sm:px-3 py-2 rounded-lg text-sm ${m.from === 'user' ? 'ml-auto bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-white border border-cyan-500/30' : (m.from === 'bot' ? 'mr-auto bg-white/5 text-gray-200 border border-white/10' : 'mx-auto bg-purple-500/10 text-purple-200 border border-purple-500/20')}`}>
               <div className="text-sm whitespace-pre-wrap">{m.text}</div>
 
               {/* render citations when present (frontend-only mock) */}
               {m.citations && m.citations.length > 0 && (
-                <div className="mt-2 border-t border-slate-700 pt-2 text-xs text-muted">
+                <div className="mt-2 border-t border-gray-300 dark:border-gray-600 pt-2 text-xs text-gray-600 dark:text-gray-400">
                   <div className="font-semibold text-[12px] mb-1">Sources</div>
                   <ul className="list-disc pl-4 space-y-2">
                     {m.citations.map((s, idx) => (
@@ -181,36 +180,36 @@ export default function ChatWidget() {
                 </div>
               )}
 
-              {m.createdAt && <div className="text-[10px] text-muted mt-1">{new Date(m.createdAt).toLocaleTimeString()}</div>}
+              {m.createdAt && <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{new Date(m.createdAt).toLocaleTimeString()}</div>}
             </div>
           ))}
         </div>
 
         {/* Input area */}
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <input
             value={input}
             onChange={e=>setInput(e.target.value)}
             onKeyDown={e=>{ if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
             placeholder="Ask about a stock or financial report..."
-            className="input flex-1"
+            className="input flex-1 bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white placeholder:text-gray-400 focus:border-cyan-400/50 focus:outline-none transition-colors"
             aria-label="chat-input"
             rows={1}
           />
 
-          <div className="flex items-center gap-2">
-            <label className="inline-flex items-center px-3 py-2 rounded-md bg-slate-700/20 cursor-pointer text-sm" title="Upload PDF/CSV">
+          <div className="flex items-center gap-2 flex-wrap">
+            <label className="inline-flex items-center px-2 sm:px-3 py-2 rounded-lg bg-white/10 border border-white/20 cursor-pointer text-sm text-white hover:bg-white/20 transition-colors" title="Upload PDF/CSV">
               <input ref={fileRef} type="file" accept=".pdf,.csv,.txt" onChange={onFileChange} style={{display:'none'}} />
               Upload
             </label>
-            <button onClick={() => send()} disabled={sending} className="btn-cta px-4 py-2">{sending ? 'Thinking…' : 'Send'}</button>
-            <button onClick={exportChat} className="cta-ghost px-4 py-2">Export Chat</button>
+            <button onClick={() => send()} disabled={sending} className="btn-cta px-3 sm:px-4 py-2 text-sm bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all transform hover:scale-105">{sending ? 'Thinking…' : 'Send'}</button>
+            <button onClick={exportChat} className="cta-ghost px-3 sm:px-4 py-2 text-sm bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-colors">Export Chat</button>
           </div>
         </div>
 
         {/* Optional small preview area for uploaded content */}
         {historyPreview && (
-          <div className="mt-3 p-3 rounded-md bg-black/5 text-sm text-muted">{historyPreview}</div>
+          <div className="mt-3 p-3 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-300">{historyPreview}</div>
         )}
       </div>
     </div>

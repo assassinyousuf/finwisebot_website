@@ -11,8 +11,7 @@ export function getStoredTheme() {
 
 export function applyTheme(theme) {
   if (typeof document === 'undefined') return
-  document.documentElement.classList.toggle('theme-dark', theme === 'dark')
-  document.documentElement.classList.toggle('theme-light', theme === 'light')
+  document.documentElement.classList.toggle('dark', theme === 'dark')
   const meta = document.querySelector('meta[name="color-scheme"]')
   if (meta) meta.setAttribute('content', theme === 'dark' ? 'dark' : 'light')
 }

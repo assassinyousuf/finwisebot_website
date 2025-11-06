@@ -1,248 +1,131 @@
 import bcrypt from 'bcryptjs'
 import validator from 'validator'
-import crypto from 'crypto'
 
-import dbConnect from '../../lib/mongoose'
-import User from '../../models/User'
+// Simple localStorage-based auth for demo purposes
+const STORAGE_PREFIX = 'finwisebot_auth_'
 
-// Simple in-memory rate limiter map: ip -> { count, firstSeen }
-const rateMap = new Map()
-const RATE_LIMIT_MAX = 5 // max signups per window
-const RATE_LIMIT_WINDOW = 1000 * 60 * 60 // 1 hour
-
-function checkRate(ip) {
-  const now = Date.now()
-  const entry = rateMap.get(ip) || { count: 0, firstSeen: now }
-  if (now - entry.firstSeen > RATE_LIMIT_WINDOW) {
-    // reset
-    entry.count = 0
-    entry.firstSeen = now
+function read(key, fallback) {
+  if (typeof localStorage === 'undefined') return fallback
+  try {
+    const raw = localStorage.getItem(STORAGE_PREFIX + key)
+    return raw ? JSON.parse(raw) : fallback
+  } catch (e) {
+    return fallback
   }
-  entry.count += 1
-  rateMap.set(ip, entry)
-  return entry.count <= RATE_LIMIT_MAX
 }
+
+function write(key, val) {
+  if (typeof localStorage === 'undefined') return
+  try {
+    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(val))
+  } catch (e) {}
+}
+
+// Initialize default admin user if not exists
+function initializeDefaultUser() {
+  const users = read('users', [])
+  const adminUser = users.find(u => u.email === 'admin@local')
+
+  if (!adminUser) {
+    // Create default admin user
+    const saltRounds = 10
+    const hash = bcrypt.hashSync('1AAAAAAAA', saltRounds)
+    const user = {
+      id: 'local-admin',
+      email: 'admin@local',
+      passwordHash: hash,
+      roles: ['admin'],
+      createdAt: new Date().toISOString()
+    }
+    users.push(user)
+    write('users', users)
+    console.log('Default admin user created: admin@local / 1AAAAAAAA')
+  } else if (!adminUser.passwordHash) {
+    // Update existing user with password if missing
+    const saltRounds = 10
+    adminUser.passwordHash = bcrypt.hashSync('1AAAAAAAA', saltRounds)
+    adminUser.createdAt = adminUser.createdAt || new Date().toISOString()
+    write('users', users)
+    console.log('Default admin user password set: admin@local / 1AAAAAAAA')
+  }
+}
+
+// Initialize on module load
+initializeDefaultUser()
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const { action, email, password } = req.body || {}
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown'
-
-  // connect to DB (no-op if MONGODB_URI not set)
-  await dbConnect()
 
   if (action === 'signup') {
-    if (!checkRate(ip)) {
-      return res.status(429).json({ ok: false, error: 'Too many signup attempts from this IP. Try again later.' })
-    }
-
     // Basic validation
     if (!email || !validator.isEmail(String(email))) {
       return res.status(400).json({ ok: false, error: 'Invalid email address' })
     }
-    if (!password || typeof password !== 'string' || password.length < 8) {
-      return res.status(400).json({ ok: false, error: 'Password must be at least 8 characters' })
-    }
-    if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
-      return res.status(400).json({ ok: false, error: 'Password must include letters and numbers' })
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ ok: false, error: 'Password must be at least 6 characters' })
     }
 
-    try {
-      const existing = await User.findOne({ email: email.toLowerCase() })
-      if (existing) return res.status(409).json({ ok: false, error: 'Email already registered' })
-
-      const saltRounds = 10
-      const hash = bcrypt.hashSync(password, saltRounds)
-      const verifyToken = crypto.randomBytes(20).toString('hex')
-
-      const user = new User({
-        email: email.toLowerCase(),
-        passwordHash: hash,
-        verified: false,
-        verifyToken,
-      })
-
-      await user.save()
-
-      const resp = { ok: true, message: 'Account created. Verification email sent.' }
-      if (process.env.NODE_ENV !== 'production') resp.verifyToken = verifyToken
-      return res.status(201).json(resp)
-    } catch (err) {
-      console.error('signup error', err)
-      return res.status(500).json({ ok: false, error: 'Internal server error' })
+    // Check if user already exists
+    const users = read('users', [])
+    const existing = users.find(u => u.email === email.toLowerCase())
+    if (existing) {
+      return res.status(409).json({ ok: false, error: 'Email already registered' })
     }
+
+    // Create user
+    const saltRounds = 10
+    const hash = bcrypt.hashSync(password, saltRounds)
+    const user = {
+      id: 'u_' + Date.now(),
+      email: email.toLowerCase(),
+      passwordHash: hash,
+      roles: [],
+      createdAt: new Date().toISOString()
+    }
+    users.push(user)
+    write('users', users)
+
+    return res.status(201).json({ ok: true, message: 'Account created successfully!' })
   }
 
   if (action === 'login') {
-    if (!email || !password) return res.status(400).json({ ok: false, error: 'Missing credentials' })
-    try {
-      const user = await User.findOne({ email: String(email).toLowerCase() })
-      if (!user) return res.status(401).json({ ok: false, error: 'Invalid email or password' })
-
-      const match = bcrypt.compareSync(password, user.passwordHash)
-      if (!match) return res.status(401).json({ ok: false, error: 'Invalid email or password' })
-
-      if (!user.verified) {
-        if (process.env.NODE_ENV !== 'production') {
-          return res.status(403).json({ ok: false, error: 'Email not verified', verifyToken: user.verifyToken })
-        }
-        return res.status(403).json({ ok: false, error: 'Email not verified' })
-      }
-
-      // Issue httpOnly JWT cookie on login
-      try {
-        const { signToken } = await import('../../lib/jwt')
-        const token = signToken({ sub: user._id.toString(), email: user.email })
-        // set cookie
-        const cookie = await import('cookie')
-        const serialized = cookie.serialize('finwise_token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7, // 7 days
-        })
-        res.setHeader('Set-Cookie', serialized)
-        return res.status(200).json({ ok: true, message: 'Logged in' })
-      } catch (err) {
-        console.error('cookie/jwt error', err)
-        return res.status(200).json({ ok: true, message: 'Logged in (no cookie set)' })
-      }
-    } catch (err) {
-      console.error('login error', err)
-      return res.status(500).json({ ok: false, error: 'Internal server error' })
+    if (!email || !password) {
+      return res.status(400).json({ ok: false, error: 'Missing credentials' })
     }
-  }
 
-  // Request password reset: generate token, save expiry, and send email (dev: return token)
-  if (action === 'request_reset') {
-    const { email: reqEmail } = req.body || {}
-    if (!reqEmail) return res.status(400).json({ ok: false, error: 'email required' })
-    try {
-      const user = await User.findOne({ email: String(reqEmail).toLowerCase() })
-      if (!user) return res.status(404).json({ ok: false, error: 'User not found' })
-      const token = crypto.randomBytes(20).toString('hex')
-      user.resetToken = token
-      user.resetExpires = new Date(Date.now() + 1000 * 60 * 60) // 1 hour
-      await user.save()
-      // In production you'd send an email with a reset link containing the token
-      const resp = { ok: true, message: 'Password reset requested. Check your email.' }
-      if (process.env.NODE_ENV !== 'production') resp.resetToken = token
-      return res.status(200).json(resp)
-    } catch (err) {
-      console.error('request_reset error', err)
-      return res.status(500).json({ ok: false, error: 'Internal server error' })
+    const users = read('users', [])
+    const user = users.find(u => u.email === email.toLowerCase())
+    if (!user) {
+      return res.status(401).json({ ok: false, error: 'Invalid email or password' })
     }
-  }
 
-  // Reset password using token
-  if (action === 'reset_password') {
-    const { token, newPassword } = req.body || {}
-    if (!token || !newPassword) return res.status(400).json({ ok: false, error: 'token and newPassword required' })
-    if (typeof newPassword !== 'string' || newPassword.length < 8) return res.status(400).json({ ok: false, error: 'Password too weak' })
-    try {
-      const user = await User.findOne({ resetToken: String(token), resetExpires: { $gt: new Date() } })
-      if (!user) return res.status(400).json({ ok: false, error: 'Invalid or expired token' })
-      const bcrypt = await import('bcryptjs')
-      user.passwordHash = bcrypt.hashSync(newPassword, 10)
-      user.resetToken = undefined
-      user.resetExpires = undefined
-      await user.save()
-      // Optionally log the user in after reset
-      try {
-        const { signToken } = await import('../../lib/jwt')
-        const tokenJwt = signToken({ sub: user._id.toString(), email: user.email })
-        const cookie = await import('cookie')
-        const serialized = cookie.serialize('finwise_token', tokenJwt, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7,
-        })
-        res.setHeader('Set-Cookie', serialized)
-      } catch (e) {
-        // ignore
-      }
-      return res.status(200).json({ ok: true, message: 'Password reset' })
-    } catch (err) {
-      console.error('reset_password error', err)
-      return res.status(500).json({ ok: false, error: 'Internal server error' })
+    const match = bcrypt.compareSync(password, user.passwordHash)
+    if (!match) {
+      return res.status(401).json({ ok: false, error: 'Invalid email or password' })
     }
+
+    // Store current user in localStorage
+    const userSession = {
+      id: user.id,
+      email: user.email,
+      roles: user.roles,
+      loggedInAt: new Date().toISOString()
+    }
+    write('currentUser', userSession)
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Logged in successfully!',
+      user: userSession
+    })
   }
 
   if (action === 'logout') {
-    try {
-      const cookie = await import('cookie')
-      const serialized = cookie.serialize('finwise_token', '', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 0,
-      })
-      res.setHeader('Set-Cookie', serialized)
-      return res.status(200).json({ ok: true, message: 'Logged out' })
-    } catch (err) {
-      console.error('logout error', err)
-      return res.status(500).json({ ok: false, error: 'Logout failed' })
-    }
-  }
-
-  if (action === 'verify') {
-    // Verify a user's email using the verifyToken generated at signup.
-    const { token: vtoken } = req.body || {}
-    if (!vtoken) return res.status(400).json({ ok: false, error: 'Missing verification token' })
-    try {
-      const user = await User.findOne({ verifyToken: String(vtoken) })
-      if (!user) return res.status(404).json({ ok: false, error: 'Invalid or expired verification token' })
-      user.verified = true
-      user.verifyToken = undefined
-      await user.save()
-
-      // Optionally sign-in the user automatically by issuing cookie
-      try {
-        const { signToken } = await import('../../lib/jwt')
-        const token = signToken({ sub: user._id.toString(), email: user.email })
-        const cookie = await import('cookie')
-        const serialized = cookie.serialize('finwise_token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7,
-        })
-        res.setHeader('Set-Cookie', serialized)
-      } catch (e) {
-        // ignore cookie errors
-      }
-
-      return res.status(200).json({ ok: true, message: 'Email verified' })
-    } catch (err) {
-      console.error('verify error', err)
-      return res.status(500).json({ ok: false, error: 'Internal server error' })
-    }
+    write('currentUser', null)
+    return res.status(200).json({ ok: true, message: 'Logged out' })
   }
 
   return res.status(400).json({ ok: false, error: 'Unknown action' })
-}
-
-// Support logout by clearing the finwise_token cookie
-export async function logoutHandler(req, res) {
-  try {
-    const cookie = await import('cookie')
-    const serialized = cookie.serialize('finwise_token', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 0,
-    })
-    res.setHeader('Set-Cookie', serialized)
-    return res.status(200).json({ ok: true, message: 'Logged out' })
-  } catch (err) {
-    console.error('logout error', err)
-    return res.status(500).json({ ok: false, error: 'Logout failed' })
-  }
 }
