@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "export": "next build && next export",
     "test-mongo": "node scripts/test-mongo-conn-verbose.js",
     "save-api-key": "node scripts/save-api-key.js",
     "seed-admin": "node scripts/seed-admin.js"
