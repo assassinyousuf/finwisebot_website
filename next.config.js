@@ -1,10 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  images: {
-    unoptimized: true,
-  },
+  // Only enable static export for production builds
+  ...(process.env.NODE_ENV === 'production' && process.env.NEXT_STATIC_EXPORT === 'true' && {
+    output: 'export',
+    trailingSlash: true,
+    images: {
+      unoptimized: true,
+    },
+  }),
   // Exclude API routes from static export
   experimental: {
     serverComponentsExternalPackages: [],
