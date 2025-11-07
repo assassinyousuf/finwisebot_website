@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Only enable static export for production builds
-  ...(process.env.NODE_ENV === 'production' && process.env.NEXT_STATIC_EXPORT === 'true' && {
+  // Enable static export when NEXT_STATIC_EXPORT is set (for GitHub Pages deployment)
+  ...(process.env.NEXT_STATIC_EXPORT === 'true' && {
     output: 'export',
     trailingSlash: true,
     images: {

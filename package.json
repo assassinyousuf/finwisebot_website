@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "export": "NEXT_STATIC_EXPORT=true next build",
+    "export": "cross-env NEXT_STATIC_EXPORT=true next build",
     "start": "next start",
     "test-mongo": "node scripts/test-mongo-conn-verbose.js",
     "save-api-key": "node scripts/save-api-key.js",
