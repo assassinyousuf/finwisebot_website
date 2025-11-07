@@ -85,20 +85,41 @@ const mockApi = {
       return { ok: true, user: userSession }
     }
 
-    // For other users, check if they have a password hash
-    if (user.passwordHash) {
-      // This would require bcrypt on client side, but for demo we'll use simple check
-      // In a real app, you'd use a proper client-side auth library
-      if (password === 'demo123') { // fallback for demo users
+    // For other users, check if they have a password
+    if (user.password) {
+      // Compare the stored password directly
+      if (user.password === password) {
         const userSession = {
           id: user.id,
           email: user.email,
+          displayName: user.displayName,
+          fullName: user.fullName,
+          company: user.company,
+          title: user.title,
+          avatar: user.avatar,
           roles: user.roles || [],
           loggedInAt: new Date().toISOString()
         }
         write('currentUser', userSession)
         return { ok: true, user: userSession }
       }
+    }
+
+    // Fallback for demo users without password (legacy support)
+    if (password === 'demo123') {
+      const userSession = {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        fullName: user.fullName,
+        company: user.company,
+        title: user.title,
+        avatar: user.avatar,
+        roles: user.roles || [],
+        loggedInAt: new Date().toISOString()
+      }
+      write('currentUser', userSession)
+      return { ok: true, user: userSession }
     }
 
     return { ok: false, error: 'Invalid email or password' }
@@ -114,7 +135,7 @@ const mockApi = {
       return { ok: false, error: 'Email already registered' }
     }
 
-    // Create new user with profile fields
+    // Create new user with profile fields and password
     const user = {
       id: 'u_' + Date.now(),
       email: email.toLowerCase(),
@@ -126,6 +147,12 @@ const mockApi = {
       roles: [],
       createdAt: new Date().toISOString()
     }
+
+    // Store password (plain text for demo purposes)
+    if (password) {
+      user.password = password
+    }
+
     users.push(user)
     write('users', users)
 
@@ -292,6 +319,7 @@ const mockApi = {
     }
     // For demo purposes, just update the password (no current password validation)
     // In a real app, you'd validate the current password
+    user.password = newPassword
     write('users', users)
     return { ok: true }
   },
@@ -379,8 +407,8 @@ mockApi.resetPassword = async (token, newPassword) => {
     u = { id: 'u_' + Date.now(), email, roles: [] }
     users.push(u)
   }
-  const enc = typeof btoa === 'function' ? btoa(newPassword) : Buffer.from(newPassword).toString('base64')
-  u._pw = enc
+  const enc = newPassword
+  u.password = enc
   write('users', users)
   // consume token
   delete resets[token]

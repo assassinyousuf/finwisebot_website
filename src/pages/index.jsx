@@ -20,7 +20,7 @@ function generateSparkline(values = [], w = 80, h = 28, color = "#60E0A6", showG
   const max = Math.max(...values)
   const min = Math.min(...values)
   const len = values.length
-  const id = `spark-${Math.random().toString(36).substr(2, 9)}`
+  const id = `spark-${values[0]}-${len}-${color.replace('#', '')}` // Deterministic ID based on data
 
   const points = values.map((v, i) => {
     const x = (i / (len - 1)) * w
@@ -172,7 +172,13 @@ function LiveNews(){
 
   useEffect(() => {
     setMounted(true)
-    // enrich existing items with price/change/spark on client
+  }, [])
+
+  // Separate effect for enriching data - only after hydration
+  useEffect(() => {
+    if (!mounted) return
+
+    // enrich existing items with price/change/spark on client only
     setFeed(f => f.map(x => ({
       ...x,
       price: +(100 + Math.random()*900).toFixed(2),
@@ -195,7 +201,7 @@ function LiveNews(){
       setFeed(f => [rec, ...f].slice(0, 8))
     }, 4000) // Update every 4 seconds for more realistic news flow
     return () => clearInterval(t)
-  }, [])
+  }, [mounted])
 
   const getSentimentColor = (sentiment) => {
     switch (sentiment) {
@@ -331,8 +337,10 @@ function MarketOverview(){
   useEffect(() => {
     setMounted(true)
 
-    // Simulate live data updates
+    // Simulate live data updates - only start after hydration
     const interval = setInterval(() => {
+      if (!mounted) return // Don't update until hydrated
+      
       setLiveData(prev => {
         const newData = { ...prev }
         indices.forEach(index => {
@@ -353,21 +361,27 @@ function MarketOverview(){
     }, 2000) // Update every 2 seconds
 
     return () => clearInterval(interval)
-  }, [])
+  }, [mounted])
 
   const data = indices.map(i => ({
     ...i,
     ...(liveData[i.ticker] || {
-      price: i.type === 'crypto' ? 50000 + Math.random() * 30000 : 2000 + Math.random() * 3000,
-      change: (Math.random() - 0.5) * 4,
-      volume: Math.floor(Math.random() * 1000000) + 100000,
+      price: i.type === 'crypto' ? 
+        (i.ticker === 'BTC-USD' ? 45000 : 35000) : // Static prices for SSR
+        (i.ticker === '^GSPC' ? 4200 : i.ticker === '^DJI' ? 34000 : i.ticker === '^IXIC' ? 13500 : i.ticker === '^RUT' ? 2000 : i.ticker === '^VIX' ? 18 : 2000),
+      change: mounted ? (Math.random() - 0.5) * 4 : 0, // Only randomize after hydration
+      volume: i.type === 'crypto' ? 2500000 : // Static volumes for SSR
+        (i.ticker === '^GSPC' ? 3500000 : i.ticker === '^DJI' ? 2800000 : i.ticker === '^IXIC' ? 4200000 : i.ticker === '^RUT' ? 1800000 : i.ticker === '^VIX' ? 0 : 2000000),
       marketCap: i.type === 'crypto' ? 50000000000 : 2000000000,
-      pe: i.type === 'index' ? null : (10 + Math.random() * 20),
+      pe: i.type === 'index' ? null : (i.ticker === 'AAPL' ? 28.5 : i.ticker === 'MSFT' ? 32.1 : i.ticker === 'GOOGL' ? 25.8 : i.ticker === 'AMZN' ? 45.2 : i.ticker === 'TSLA' ? 65.4 : 15.0),
       lastUpdate: Date.now()
     }),
     spark: Array.from({length:20}).map((_, idx) => {
-      const base = i.type === 'crypto' ? 50000 : 2000
-      return base + Math.sin(idx * 0.5) * 500 + Math.random() * 200
+      const base = i.type === 'crypto' ? 
+        (i.ticker === 'BTC-USD' ? 45000 : 35000) :
+        (i.ticker === '^GSPC' ? 4200 : i.ticker === '^DJI' ? 34000 : i.ticker === '^IXIC' ? 13500 : i.ticker === '^RUT' ? 2000 : i.ticker === '^VIX' ? 18 : 2000)
+      const seed = i.ticker.charCodeAt(0) + idx // Deterministic seed
+      return base + Math.sin(seed * 0.5) * 500 + (seed % 200)
     })
   }))
 
