@@ -32,7 +32,9 @@ jobs:
         run: npm ci
 
       - name: Build project
-        run: npm run export
+        run: NEXT_STATIC_EXPORT=true npm run build
+        env:
+          NEXT_STATIC_EXPORT: true
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
