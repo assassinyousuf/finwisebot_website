@@ -1,14 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable static export when NEXT_STATIC_EXPORT is set (for GitHub Pages deployment)
-  ...(process.env.NEXT_STATIC_EXPORT === 'true' && {
-    output: 'export',
-    trailingSlash: true,
-    images: {
-      unoptimized: true,
-    },
-  }),
-  // Exclude API routes from static export
+  // Vercel deployment - no static export needed
   experimental: {
     serverComponentsExternalPackages: [],
   },
